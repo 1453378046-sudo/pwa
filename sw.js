@@ -3,7 +3,14 @@ const CACHE_NAME = `self-system-${SW_VERSION}`;
 const PRECACHE_URLS = [
     './',
     'index.html',
+    '404.html',
     'manifest.json',
+    'manifest.webmanifest',
+    'icon.svg',
+    'app.js',
+    'styles.css',
+    'panel/index.html',
+    'calendar/index.html',
     'styles/main.css?v=4.8',
     'styles/gk.css?v=1.3',
     'styles/pdf-viewer.css?v=1.1',
@@ -67,6 +74,7 @@ function isStaticAsset(url) {
         pathname.endsWith('.js') ||
         pathname.endsWith('.css') ||
         pathname.endsWith('.mjs') ||
+        pathname.endsWith('.webmanifest') ||
         pathname.endsWith('.woff2') ||
         pathname.endsWith('.woff') ||
         pathname.endsWith('.ttf') ||
