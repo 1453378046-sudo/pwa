@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国古代名句辞典 - PDF查看器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .pdf-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .pdf-viewer {
+            width: 100%;
+            height: 80vh;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .info-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .book-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-item {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .info-item h3 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .instructions li:before {
+            content: "•";
+            color: #1976d2;
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .pdf-viewer {
+                height: 60vh;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 中国古代名句辞典</h1>
+            <p>修订本 - 传统文化宝库</p>
+        </div>
+        
+        <div class="pdf-container">
+            <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">PDF查看器</h2>
+            <object 
+                class="pdf-viewer" 
+                data="中国古代名句辞典(修订本).1_副本.pdf" 
+                type="application/pdf">
+                
+                <div style="text-align: center; padding: 50px;">
+                    <p style="color: #666; font-size: 1.2em; margin-bottom: 20px;">
+                        您的浏览器不支持PDF预览，请点击下方链接下载查看：
+                    </p>
+                    <a href="中国古代名句辞典(修订本).1_副本.pdf" download 
+                       style="display: inline-block; padding: 15px 30px; 
+                              background: linear-gradient(135deg, #667eea, #764ba2); 
+                              color: white; text-decoration: none; border-radius: 8px; 
+                              font-weight: bold;">
+                        📥 下载PDF文件
+                    </a>
+                </div>
+            </object>
+            
+            <div class="controls">
+                <button class="btn" onclick="window.open('中国古代名句辞典(修订本).1_副本.pdf', '_blank')">
+                    🚀 在新窗口打开
+                </button>
+                <button class="btn" onclick="downloadPDF()">
+                    📥 下载文件
+                </button>
+                <button class="btn" onclick="printPDF()">
+                    🖨️ 打印文档
+                </button>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>📖 书籍信息</h2>
+            
+            <div class="book-info">
+                <div class="info-item">
+                    <h3>文件信息</h3>
+                    <p>大小: 101MB</p>
+                    <p>页数: 1123页</p>
+                </div>
+                
+                <div class="info-item">
+                    <h3>内容类型</h3>
+                    <p>扫描版古籍</p>
+                    <p>图像格式PDF</p>
+                </div>
+                
+                <div class="info-item">
+                    <h3>使用说明</h3>
+                    <p>支持缩放、搜索</p>
+                    <p>可下载离线阅读</p>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>🔍 使用指南</h3>
+                <ul>
+                    <li>使用鼠标滚轮或触摸板进行页面缩放</li>
+                    <li>点击工具栏按钮进行页面导航（上一页/下一页）</li>
+                    <li>使用浏览器的查找功能（Ctrl+F）搜索文本内容</li>
+                    <li>建议在电脑上使用以获得最佳阅读体验</li>
+                    <li>如需详细阅读，建议下载后使用专业PDF阅读器</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function downloadPDF() {
+            const link = document.createElement('a');
+            link.href = '中国古代名句辞典(修订本).1_副本.pdf';
+            link.download = '中国古代名句辞典(修订本).pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function printPDF() {
+            const pdfWindow = window.open('中国古代名句辞典(修订本).1_副本.pdf', '_blank');
+            setTimeout(() => {
+                pdfWindow.print();
+            }, 1000);
+        }
+        
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'f':
+                        e.preventDefault();
+                        alert('使用浏览器自带的查找功能（Ctrl+F）进行搜索');
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        printPDF();
+                        break;
+                }
+            }
+        });
+        
+        console.log('PDF查看器已加载，文件：中国古代名句辞典(修订本).1_副本.pdf');
+    </script>
+</body>
+</html>

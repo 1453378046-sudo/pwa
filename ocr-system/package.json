@@ -1,0 +1,27 @@
+{
+  "name": "ocr-pdf-processor",
+  "version": "1.0.0",
+  "description": "高效OCR文字识别系统，专门处理古籍PDF文件",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "process": "node modules/batch-processor.js",
+    "test": "node test/performance-test.js"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^3.11.174",
+    "sharp": "^0.33.2",
+    "tesseract.js": "^5.0.4",
+    "jimp": "^0.22.10",
+    "node-tesseract-ocr": "^2.0.1",
+    "async": "^3.2.4",
+    "commander": "^11.1.0",
+    "progress": "^2.0.3",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1",
+    "archiver": "^5.3.1"
+  },
+  "keywords": ["ocr", "pdf", "text-recognition", "chinese", "ancient-books"],
+  "author": "OCR System",
+  "license": "MIT"
+}

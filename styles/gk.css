@@ -1,0 +1,427 @@
+
+/* 通识模块样式 */
+.gk-quotes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.gk-quote-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.gk-quote-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.gk-quote-text {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.6;
+    font-family: "Songti SC", "SimSun", serif; /* 使用衬线体更有韵味 */
+}
+
+.gk-quote-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.gk-quote-author {
+    font-weight: 600;
+    color: #b45309;
+}
+
+.gk-quote-meaning {
+    font-size: 0.95rem;
+    color: #475569;
+    padding-top: 0.8rem;
+    border-top: 1px dashed rgba(148, 163, 184, 0.3);
+}
+
+/* 背诵卡片翻转效果 */
+.gk-recite-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    perspective: 1000px;
+}
+
+.gk-recite-card {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.gk-recite-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.gk-card-front, .gk-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 24px;
+    padding: 2rem;
+    background: white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.gk-card-front {
+    background: linear-gradient(135deg, #fffdf5 0%, #fff7ed 100%);
+}
+
+.gk-card-back {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    transform: rotateY(180deg);
+}
+
+.gk-card-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    font-family: "Songti SC", "SimSun", serif;
+}
+
+.gk-recite-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.gk-recite-controls button {
+    min-width: 100px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 99px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+    color: white;
+}
+
+.gk-recite-controls button:hover {
+    transform: translateY(-2px);
+}
+
+.btn-danger { background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+.btn-warning { background: #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+.btn-success { background: #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+
+.gk-subview {
+    display: none;
+}
+
+.gk-subview.active {
+    display: block;
+}
+
+.gk-modules {
+    margin-top: 1rem;
+}
+
+.pwa-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    margin: 0 0 1.25rem 0;
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.pwa-tab {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text);
+    padding: 0.6rem 0.95rem;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.pwa-tab:hover {
+    background: var(--surface);
+    border-color: var(--border);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.pwa-tab.active {
+    background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    color: white;
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+}
+
+.pwa-tab:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.oxford-reader {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1rem;
+    min-height: 70vh;
+    height: 70vh;
+}
+
+.oxford-sidebar {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    box-shadow: var(--shadow-sm);
+}
+
+.oxford-sidebar-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.oxford-bookmarks {
+    padding: 0.75rem 1rem 0.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.oxford-bookmarks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.oxford-bookmarks-title {
+    font-weight: 900;
+    color: var(--text);
+}
+
+.oxford-bookmarks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    max-height: 32vh;
+    overflow: auto;
+    padding-right: 0.15rem;
+}
+
+.oxford-bookmark-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.oxford-bookmark-jump {
+    appearance: none;
+    border: 1px solid transparent;
+    background: rgba(var(--primary-rgb), 0.07);
+    color: var(--text);
+    text-align: left;
+    padding: 0.55rem 0.7rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.oxford-bookmark-jump:hover {
+    background: rgba(var(--primary-rgb), 0.10);
+    border-color: rgba(var(--primary-rgb), 0.20);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(var(--primary-rgb), 0.10);
+}
+
+.oxford-bookmark-del {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: rgba(31, 41, 55, 0.85);
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.oxford-bookmark-del:hover {
+    background: rgba(239, 68, 68, 0.10);
+    border-color: rgba(239, 68, 68, 0.30);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(239, 68, 68, 0.12);
+}
+
+.oxford-sidebar-section {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--surface);
+}
+
+.oxford-sidebar-title {
+    font-weight: 900;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.oxford-nav {
+    padding: 0.5rem 0.25rem 0.75rem;
+    overflow: auto;
+    flex: 1;
+}
+
+.oxford-nav-group {
+    padding: 0.5rem 0.75rem;
+}
+
+.oxford-nav-group-title {
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: rgba(30, 41, 59, 0.75);
+    margin: 0.25rem 0 0.5rem;
+}
+
+.oxford-nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.oxford-nav-item {
+    appearance: none;
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: left;
+    padding: 0.65rem 0.75rem;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 750;
+    color: rgba(31, 41, 55, 0.9);
+    transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.oxford-nav-item:hover {
+    background: rgba(var(--primary-rgb), 0.08);
+    border-color: rgba(var(--primary-rgb), 0.20);
+    transform: translateY(-1px);
+}
+
+.oxford-nav-item.active {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.18), rgba(var(--primary-rgb), 0.08));
+    border-color: rgba(var(--primary-rgb), 0.35);
+    box-shadow: 0 10px 22px rgba(var(--primary-rgb), 0.14);
+}
+
+.oxford-main {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    box-shadow: var(--shadow-sm);
+}
+
+.oxford-toolbar {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-muted);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.oxford-toolbar-left,
+.oxford-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.oxford-book-meta {
+    font-weight: 850;
+    color: rgba(31, 41, 55, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: min(520px, 60vw);
+}
+
+#oxfordRendition {
+    flex: 1;
+    overflow: auto;
+    background: white;
+    min-height: 0;
+    position: relative;
+}
+
+#gkOxfordView[data-oxford-theme="night"] #oxfordRendition {
+    background: #0b1220;
+}
+
+#oxfordRendition iframe {
+    border: 0;
+}
+
+.oxford-empty {
+    padding: 2rem;
+    color: rgba(31, 41, 55, 0.75);
+    font-weight: 650;
+}
+
+@media (max-width: 900px) {
+    .oxford-reader {
+        grid-template-columns: 1fr;
+    }
+    .oxford-book-meta {
+        max-width: 100%;
+    }
+}

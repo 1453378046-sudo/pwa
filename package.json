@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
+    "epubjs": "^0.3.93",
+    "pdf-parse": "^2.4.5",
+    "pdf2json": "^4.0.0",
+    "pdfjs-dist": "^5.4.530",
+    "unzipper": "^0.12.3",
+    "xlsx": "^0.18.5"
+  }
+}

@@ -1,0 +1,3060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="自我系统">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="description" content="个人成长管理系统 - 包含清单、学习、财务、生活、工作、智慧六大系统">
+    <title>自我系统 - 个人成长管理</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="styles/main.css?v=4.8">
+    <link rel="stylesheet" href="styles/gk.css?v=1.3">
+    <link rel="stylesheet" href="styles/pdf-viewer.css?v=1.1">
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button type="button" class="sidebar-toggle ui-tooltip" id="sidebarToggle" data-tooltip="展开/收起侧边栏" aria-label="展开或收起侧边栏">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="app-title">
+                    <i class="fas fa-brain"></i>
+                    <span class="app-title-text">自我系统</span>
+                </h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-container">
+                    <button class="nav-item active" data-system="overview">
+                        <i class="fas fa-home"></i>
+                        <span class="nav-text">概览</span>
+                    </button>
+                    <button class="nav-item" data-system="checklist">
+                        <i class="fas fa-list-check"></i>
+                        <span class="nav-text">清单</span>
+                    </button>
+                    <button class="nav-item" data-system="learning">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span class="nav-text">学习</span>
+                    </button>
+                    <button class="nav-item" data-system="finance">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">财务</span>
+                    </button>
+                    <button class="nav-item" data-system="life">
+                        <i class="fas fa-heart"></i>
+                        <span class="nav-text">生活</span>
+                    </button>
+                    <button class="nav-item" data-system="work">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="nav-text">工作</span>
+                    </button>
+                    <button class="nav-item" data-system="wisdom">
+                        <i class="fas fa-lightbulb"></i>
+                        <span class="nav-text">智慧</span>
+                    </button>
+                    <button class="nav-item" data-system="todo-calendar">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="nav-text">待办日历</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <div class="main-content-wrapper">
+            <!-- 顶部导航 -->
+            <header class="app-header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <button type="button" class="mobile-toggle ui-tooltip" id="mobileToggle" data-tooltip="打开导航" aria-label="打开导航">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <div class="date-display" id="currentDate"></div>
+                    </div>
+                    <div class="header-right">
+                        <div class="user-info">
+                            <i class="fas fa-user"></i>
+                            <span>用户</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="appStatus" class="app-status" role="status" aria-live="polite" hidden></div>
+
+            <!-- 主内容 -->
+            <main class="main-content">
+            <!-- 概览系统 -->
+            <section id="overview" class="system-section active">
+                <div class="pwa-header">
+                    <div class="pwa-header-content">
+                        <div class="pwa-header-title">
+                            <h1><i class="fas fa-brain"></i> 自我系统概览</h1>
+                            <p class="pwa-subtitle">全面掌控个人成长的各个维度</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pwa-container">
+                    <div class="pwa-metrics-grid">
+                        <div class="pwa-metric-card primary" data-overview-system="checklist" role="button" tabindex="0" aria-label="打开清单系统">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-list-check"></i>
+                            </div>
+                            <div class="pwa-metric-content">
+                                <span class="pwa-metric-label">清单系统</span>
+                                <span class="pwa-metric-value" id="checklist-total">0</span>
+                                <span class="pwa-metric-label">总任务</span>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card info" data-overview-system="learning" role="button" tabindex="0" aria-label="打开学习系统">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <div class="pwa-metric-content">
+                                <span class="pwa-metric-label">学习系统</span>
+                                <span class="pwa-metric-value" id="learning-total">0</span>
+                                <span class="pwa-metric-label">学习计划</span>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card success" data-overview-system="finance" role="button" tabindex="0" aria-label="打开财务系统">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="pwa-metric-content">
+                                <span class="pwa-metric-label">财务系统</span>
+                                <span class="pwa-metric-value" id="finance-total">¥0</span>
+                                <span class="pwa-metric-label">总资产</span>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card primary" data-overview-system="life" role="button" tabindex="0" aria-label="打开生活系统">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="pwa-metric-content">
+                                <span class="pwa-metric-label">生活系统</span>
+                                <span class="pwa-metric-value" id="life-total">0</span>
+                                <span class="pwa-metric-label">习惯追踪</span>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card warning" data-overview-system="work" role="button" tabindex="0" aria-label="打开工作系统">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <div class="pwa-metric-content">
+                                <span class="pwa-metric-label">工作系统</span>
+                                <span class="pwa-metric-value" id="work-total">0</span>
+                                <span class="pwa-metric-label">项目进度</span>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card info" data-overview-system="wisdom" role="button" tabindex="0" aria-label="打开智慧系统">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="pwa-metric-content">
+                                <span class="pwa-metric-label">智慧系统</span>
+                                <span class="pwa-metric-value" id="wisdom-total">0</span>
+                                <span class="pwa-metric-label">知识积累</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 学习系统 -->
+            <section id="learning" class="system-section">
+                <!-- 学习系统主页 - 模块选择 -->
+                <div id="learningHome" class="learning-home">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-graduation-cap"></i> 学习系统</h1>
+                                <p class="pwa-subtitle">提升自我，规划未来</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <div class="learning-modules">
+                        <div class="module-card" data-module="learningPlan" role="button" tabindex="0" aria-label="打开学习计划模块">
+                            <div class="module-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>学习计划模块</h3>
+                                <p>创建和管理周期性学习计划</p>
+                                <div class="module-stats">
+                                    <span class="stat">计划数量: <span id="learningPlanCount">0</span></span>
+                                    <span class="stat">今日任务: <span id="todayPlanTasksCount">0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <div class="module-card" data-module="generalKnowledge" role="button" tabindex="0" aria-label="打开通识模块">
+                            <div class="module-icon">
+                                <i class="fas fa-scroll"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>通识模块</h3>
+                                <p>中国古代名句辞典与背诵</p>
+                                <div class="module-stats">
+                                    <span class="stat">名句库: <span id="generalKnowledgeCount">0</span></span>
+                                    <span class="stat">待复习: <span id="generalKnowledgeDueCount">0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <div class="module-card" data-module="english" role="button" tabindex="0" aria-label="打开英语模块">
+                            <div class="module-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>英语</h3>
+                                <p>英语学习入口：新概念等内容</p>
+                                <div class="module-stats">
+                                    <span class="stat">新概念英语</span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <div class="module-card" data-module="reading" role="button" tabindex="0" aria-label="打开读书模块">
+                            <div class="module-icon">
+                                <i class="fas fa-book-reader"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>读书模块</h3>
+                                <p>创建读书计划并自动同步到待办日历</p>
+                                <div class="module-stats">
+                                    <span class="stat">结构化表单</span>
+                                    <span class="stat">自动同步</span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <div class="module-card" data-module="timetable" role="button" tabindex="0" aria-label="打开校园课程表模块">
+                            <div class="module-icon">
+                                <i class="fas fa-table"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>校园课程表</h3>
+                                <p>学期/作息/课程管理，并同步到待办日历</p>
+                                <div class="module-stats">
+                                    <span class="stat">周视图</span>
+                                    <span class="stat">单双周</span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card coming-soon">
+                            <div class="module-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>学习进度追踪</h3>
+                                <p>跟踪课程学习和技能提升进度</p>
+                                <div class="module-stats">
+                                    <span class="stat">开发中</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card coming-soon">
+                            <div class="module-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>学习数据分析</h3>
+                                <p>分析学习效率和成果统计</p>
+                                <div class="module-stats">
+                                    <span class="stat">开发中</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- 学习计划模块页面 -->
+                <div id="learningPlanModule" class="learning-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-calendar-alt"></i> 学习计划模块</h1>
+                                <p class="pwa-subtitle">创建和管理周期性学习计划</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title learning-plan-title-wrap">
+                                    <div class="learning-plan-title-main">
+                                        <h3>我的学习计划</h3>
+                                        <div class="plan-stats">
+                                            <span class="stat">活跃计划: <span id="activePlanCount">0</span></span>
+                                            <span class="stat">今日任务: <span id="todayPlanTasks">0</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pwa-section-actions header-actions">
+                                    <button type="button" class="btn btn-outline btn-icon ui-tooltip" id="exportLearningPlansBtn" data-tooltip="导出数据" aria-label="导出数据">
+                                        <i class="fas fa-file-export"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline btn-icon ui-tooltip" id="importLearningPlansBtn" data-tooltip="导入数据" aria-label="导入数据">
+                                        <i class="fas fa-file-import"></i>
+                                    </button>
+                                    <input type="file" id="importLearningPlansFile" accept=".json" style="display: none;">
+                                    <button class="btn btn-success" id="addLearningPlan">
+                                        <i class="fas fa-plus"></i> 添加学习计划
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="pwa-section-body">
+                                <div class="pwa-chart-container learning-plan-chart">
+                                    <canvas id="learningPlanChart"></canvas>
+                                </div>
+
+                                <div class="learning-plans-list" id="learningPlansList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <p>还没有创建学习计划</p>
+                                        <p class="empty-hint">点击右上角的"添加学习计划"按钮开始创建</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英语模块页面 -->
+                <div id="englishModule" class="learning-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-book-open"></i> 英语</h1>
+                                <p class="pwa-subtitle">英语学习模块</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container">
+                        <div class="learning-modules">
+                            <div class="module-card" data-english-submodule="newConcept" role="button" tabindex="0" aria-label="打开新概念子模块">
+                                <div class="module-icon">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div class="module-info">
+                                    <h3>新概念</h3>
+                                    <p>外部内容入口（极速英语）</p>
+                                    <div class="module-stats">
+                                        <span class="stat">第一册 72课 / 第二册 96课</span>
+                                        <span class="stat">第三册 60课 / 第四册 48课</span>
+                                    </div>
+                                </div>
+                                <div class="module-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                            <div class="module-card" data-english-submodule="materials" role="button" tabindex="0" aria-label="打开资料子模块">
+                                <div class="module-icon">
+                                    <i class="fas fa-folder-open"></i>
+                                </div>
+                                <div class="module-info">
+                                    <h3>资料</h3>
+                                    <p>英语学习工具导航（EngLearner）</p>
+                                    <div class="module-stats">
+                                        <span class="stat">工具导航</span>
+                                        <span class="stat">学习方法</span>
+                                    </div>
+                                </div>
+                                <div class="module-action">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 英语 / 资料模块页面 -->
+                <div id="englishMaterialsModule" class="learning-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回" data-back-target="english">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-folder-open"></i> 英语 / 资料</h1>
+                                <p class="pwa-subtitle">按分类导航（EngLearner）</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3>EngLearner</h3>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="new-concept-tip">提示：跨站点嵌入可能被浏览器限制；如无法显示请用“新窗口打开”。</div>
+                                <div class="pwa-section-actions" style="margin-top: 1rem;">
+                                    <button type="button" class="btn btn-outline" id="englishMaterialsCopyBtn">
+                                        <i class="fas fa-copy"></i> 复制当前链接
+                                    </button>
+                                    <button type="button" class="btn btn-success" id="englishMaterialsOpenBtn">
+                                        <i class="fas fa-arrow-up-right-from-square"></i> 新窗口打开
+                                    </button>
+                                </div>
+                                <div class="new-concept-grid" style="margin-top: 1rem;">
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#教辅资料">
+                                        <div class="new-concept-card-title">教辅资料</div>
+                                        <div class="new-concept-card-sub">教材 / 练习 / 资料合集</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#学习方法论">
+                                        <div class="new-concept-card-title">学习方法论</div>
+                                        <div class="new-concept-card-sub">自学路线 / 训练方法</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#基础学习">
+                                        <div class="new-concept-card-title">基础学习</div>
+                                        <div class="new-concept-card-sub">语法 / 发音 / 基础素材</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#阅读材料">
+                                        <div class="new-concept-card-title">阅读材料</div>
+                                        <div class="new-concept-card-sub">短文 / 小说 / 分级读物</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#听力材料">
+                                        <div class="new-concept-card-title">听力材料</div>
+                                        <div class="new-concept-card-sub">精听 / 泛听 / 听力训练</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#视频磨耳">
+                                        <div class="new-concept-card-title">视频磨耳</div>
+                                        <div class="new-concept-card-sub">影视 / 演讲 / 频道资源</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-materials-url="https://www.englearner.site/cn/index.html#记词方法">
+                                        <div class="new-concept-card-title">记词方法和工具</div>
+                                        <div class="new-concept-card-sub">方法论 / 工具站 / 训练法</div>
+                                    </button>
+                                </div>
+                                <iframe id="englishMaterialsFrame" class="english-materials-frame" src="https://www.englearner.site/cn/index.html" loading="lazy"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 新概念模块页面 -->
+                <div id="newConceptModule" class="learning-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回" data-back-target="english">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-book-open"></i> 新概念模块</h1>
+                                <p class="pwa-subtitle">外部内容入口（极速英语）</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3>内容入口</h3>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button type="button" class="btn btn-primary" id="openRunToEnglish">
+                                        <i class="fas fa-arrow-up-right-from-square"></i> 打开极速英语
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="pwa-section-body">
+                                <div class="new-concept-nav">
+                                    <div class="new-concept-row">
+                                        <div class="new-concept-field">
+                                            <label for="newConceptSearchInput">站内搜索</label>
+                                            <input id="newConceptSearchInput" class="form-control" type="text" placeholder="输入关键词，回车或点击搜索">
+                                        </div>
+                                        <button type="button" class="btn btn-primary new-concept-action-btn" id="newConceptSearchBtn">
+                                            <i class="fas fa-magnifying-glass"></i> 搜索
+                                        </button>
+                                    </div>
+
+                                    <div class="new-concept-row">
+                                        <div class="new-concept-field">
+                                            <label for="newConceptQuickSelect">快捷跳转</label>
+                                            <select id="newConceptQuickSelect" class="form-control">
+                                                <option value="/books/nce1">新概念英语第一册（目录）</option>
+                                                <option value="/books/words/1">第一册单词</option>
+                                                <option value="/books/nce2">新概念英语第二册（目录）</option>
+                                                <option value="/books/words/2">第二册单词</option>
+                                                <option value="/books/nce3">新概念英语第三册（目录）</option>
+                                                <option value="/books/words/3">第三册单词</option>
+                                                <option value="/books/nce4">新概念英语第四册（目录）</option>
+                                                <option value="/books/words/4">第四册单词</option>
+                                            </select>
+                                        </div>
+                                        <button type="button" class="btn btn-success new-concept-action-btn" id="newConceptOpenQuickBtn">
+                                            <i class="fas fa-arrow-up-right-from-square"></i> 打开
+                                        </button>
+                                    </div>
+
+                                    <div class="new-concept-row">
+                                        <div class="new-concept-field">
+                                            <label for="newConceptLessonNumber">课文编号</label>
+                                            <input id="newConceptLessonNumber" class="form-control" type="number" min="1" step="1" placeholder="例如：1">
+                                        </div>
+                                        <button type="button" class="btn btn-outline new-concept-action-btn" id="newConceptOpenLessonBtn">
+                                            <i class="fas fa-book"></i> 打开课文
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="new-concept-grid">
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/nce1">
+                                        <div class="new-concept-card-title">新概念英语第一册</div>
+                                        <div class="new-concept-card-sub">72 课 · 初级语法</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/nce2">
+                                        <div class="new-concept-card-title">新概念英语第二册</div>
+                                        <div class="new-concept-card-sub">96 课 · 中级语法</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/nce3">
+                                        <div class="new-concept-card-title">新概念英语第三册</div>
+                                        <div class="new-concept-card-sub">60 课 · 中高级语法</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/nce4">
+                                        <div class="new-concept-card-title">新概念英语第四册</div>
+                                        <div class="new-concept-card-sub">48 课 · 高级语法</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/words/1">
+                                        <div class="new-concept-card-title">第一册单词</div>
+                                        <div class="new-concept-card-sub">NCE 1 · Words</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/words/2">
+                                        <div class="new-concept-card-title">第二册单词</div>
+                                        <div class="new-concept-card-sub">NCE 2 · Words</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/words/3">
+                                        <div class="new-concept-card-title">第三册单词</div>
+                                        <div class="new-concept-card-sub">NCE 3 · Words</div>
+                                    </button>
+                                    <button type="button" class="new-concept-card btn btn-outline" data-new-concept-url="https://www.runtoenglish.com/books/words/4">
+                                        <div class="new-concept-card-title">第四册单词</div>
+                                        <div class="new-concept-card-sub">NCE 4 · Words</div>
+                                    </button>
+                                </div>
+
+                                <div class="new-concept-lists">
+                                    <div class="new-concept-list">
+                                        <div class="new-concept-list-header">
+                                            <h4>最近访问</h4>
+                                            <button type="button" class="btn btn-sm btn-outline" id="newConceptClearRecentBtn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="new-concept-list-body" id="newConceptRecentList"></div>
+                                    </div>
+                                    <div class="new-concept-list">
+                                        <div class="new-concept-list-header">
+                                            <h4>收藏</h4>
+                                            <button type="button" class="btn btn-sm btn-outline" id="newConceptClearFavoritesBtn">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="new-concept-list-body" id="newConceptFavoritesList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 通识模块页面 -->
+    <div id="generalKnowledgeModule" class="learning-module-page">
+        <div class="pwa-container">
+            <div id="gkHomeView" class="gk-subview active">
+                <div class="learning-header">
+                    <button type="button" class="btn btn-outline btn-sm back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                    <h2><i class="fas fa-layer-group"></i> 通识</h2>
+                    <div class="header-actions"></div>
+                </div>
+
+                <div class="learning-modules gk-modules">
+                    <div class="module-card" data-gk-submodule="dictionary" role="button" tabindex="0" aria-label="打开中国古代名句辞典">
+                        <div class="module-icon">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <div class="module-info">
+                            <h3>中国古代名句辞典</h3>
+                            <p>名句库、背诵挑战、学习数据、原书 PDF</p>
+                            <div class="module-stats">
+                                <span class="stat" id="gkModuleCountStat">名句库: 0</span>
+                                <span class="stat" id="gkModuleDueStat">待复习: 0</span>
+                            </div>
+                        </div>
+                        <div class="module-action">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="module-card" data-gk-submodule="oxford" role="button" tabindex="0" aria-label="打开牛津通识">
+                        <div class="module-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <div class="module-info">
+                            <h3>牛津通识</h3>
+                            <p>按专题沉浸式阅读与笔记整理</p>
+                            <div class="module-stats">
+                                <span class="stat">开发中</span>
+                            </div>
+                        </div>
+                        <div class="module-action">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gkDictionaryView" class="gk-subview">
+                <div class="learning-header">
+                    <button type="button" class="btn btn-outline btn-sm ui-tooltip" data-tooltip="返回通识" aria-label="返回通识" data-gk-back="home">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                    <h2><i class="fas fa-scroll"></i> 中国古代名句辞典</h2>
+                    <div class="header-actions">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="app.openGkSettingsModal()">
+                            <i class="fas fa-cog"></i> 设置
+                        </button>
+                        <button type="button" class="btn btn-outline btn-sm" onclick="app.openGkManualAddModal()">
+                            <i class="fas fa-plus"></i> 手动添加
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="app.openImportQuotesModal()">
+                            <i class="fas fa-file-pdf"></i> 导入PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pwa-tabs">
+                    <button type="button" class="pwa-tab active" data-tab="quotes-list" onclick="app.switchGeneralKnowledgeTab('list')">名句列表</button>
+                    <button type="button" class="pwa-tab" data-tab="quotes-recite" onclick="app.switchGeneralKnowledgeTab('recite')">背诵挑战</button>
+                    <button type="button" class="pwa-tab" data-tab="quotes-stats" onclick="app.switchGeneralKnowledgeTab('stats')">学习数据</button>
+                    <button type="button" class="pwa-tab" data-tab="quotes-pdf" onclick="app.switchGeneralKnowledgeTab('pdf')">PDF原书</button>
+                </div>
+
+                <div id="gk-view-list" class="gk-view active">
+                    <div class="pwa-search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="gkSearchInput" class="pwa-search-input" placeholder="搜索名句、作者..." oninput="app.filterQuotes()">
+                    </div>
+                    <div class="gk-quotes-grid" id="gkQuotesGrid"></div>
+                </div>
+
+                <div id="gk-view-recite" class="gk-view" style="display: none;">
+                    <div class="gk-recite-container" id="gkReciteContainer">
+                        <div class="gk-recite-card" onclick="this.classList.toggle('flipped')">
+                            <div class="gk-card-front">
+                                <div class="gk-card-content">
+                                    <h3>点击开始背诵</h3>
+                                    <p>系统将根据遗忘曲线为您安排复习</p>
+                                </div>
+                            </div>
+                            <div class="gk-card-back">
+                                <div class="gk-card-content">
+                                    <h3>答案将显示在这里</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gk-recite-controls">
+                            <button class="btn-danger" onclick="app.rateRecitation(1)">忘记</button>
+                            <button class="btn-warning" onclick="app.rateRecitation(3)">模糊</button>
+                            <button class="btn-success" onclick="app.rateRecitation(5)">记得</button>
+                        </div>
+                    </div>
+                    <div id="gkReciteEmpty" style="display: none; text-align: center; padding: 2rem;">
+                        <h3>🎉 今日复习任务已完成！</h3>
+                        <p>休息一下吧，明天再来。</p>
+                    </div>
+                </div>
+
+                <div id="gk-view-stats" class="gk-view" style="display: none;">
+                    <div class="pwa-metrics-grid">
+                        <div class="pwa-metric-card">
+                            <div class="pwa-metric-icon"><i class="fas fa-book"></i></div>
+                            <div class="pwa-metric-info">
+                                <h3>总收录</h3>
+                                <div class="pwa-metric-value" id="gkStatTotal">0</div>
+                            </div>
+                        </div>
+                        <div class="pwa-metric-card">
+                            <div class="pwa-metric-icon"><i class="fas fa-brain"></i></div>
+                            <div class="pwa-metric-info">
+                                <h3>熟记</h3>
+                                <div class="pwa-metric-value" id="gkStatMastered">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gk-view-pdf" class="gk-view" style="display: none;">
+                    <div class="pdf-module">
+                        <div class="pdf-header">
+                            <h2><i class="fas fa-book"></i> 中国古代名句辞典 - PDF原书</h2>
+                            <div class="pdf-controls">
+                                <button class="btn btn-sm" id="pdfPrevPage">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="page-info">
+                                    第 <input type="number" id="pdfPageInput" min="1" max="1123" value="1"> 页 / 共 1123 页
+                                </span>
+                                <button class="btn btn-sm" id="pdfNextPage">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button class="btn btn-sm" id="pdfToggleFullscreen">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button class="btn btn-sm" id="pdfToggleBookmark">
+                                    <i class="far fa-bookmark"></i>
+                                </button>
+                                <div class="pdf-toc-dropdown" id="pdfTocDropdownWrap">
+                                    <button class="btn btn-sm" id="pdfShowToc" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="pdfTocMenu">
+                                        <i class="fas fa-list"></i> 目录
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pdf-content">
+                            <object 
+                                id="pdfObject" 
+                                data="中国古代名句辞典(修订本).1_副本.pdf#page=1" 
+                                type="application/pdf"
+                                width="100%" 
+                                height="600">
+                                
+                                <div class="pdf-fallback">
+                                    <p>您的浏览器不支持PDF预览，请<a href="中国古代名句辞典(修订本).1_副本.pdf" download>下载PDF文件</a></p>
+                                </div>
+                            </object>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="gkOxfordView" class="gk-subview">
+                <div class="learning-header">
+                    <button type="button" class="btn btn-outline btn-sm ui-tooltip" data-tooltip="返回通识" aria-label="返回通识" data-gk-back="home">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                    <h2><i class="fas fa-book-open"></i> 牛津通识</h2>
+                    <div class="header-actions"></div>
+                </div>
+
+                <div class="pwa-section">
+                    <div class="pwa-section-header">
+                        <div class="pwa-section-title">
+                            <h2>资源</h2>
+                        </div>
+                        <div class="pwa-section-actions">
+                            <button type="button" class="pwa-btn primary" id="oxfordOpenDefaultBtn">
+                                <i class="fas fa-rotate-right"></i> 重新加载
+                            </button>
+                            <a class="pwa-btn secondary" id="oxfordDownloadBtn" href="牛津通识读本百本纪念套装（共100册）.epub" download>
+                                <i class="fas fa-download"></i> 下载EPUB
+                            </a>
+                            <a class="pwa-btn secondary" id="oxfordOpenRawBtn" href="牛津通识读本百本纪念套装（共100册）.epub" target="_blank" rel="noopener noreferrer">
+                                <i class="fas fa-up-right-from-square"></i> 直链打开
+                            </a>
+                        </div>
+                    </div>
+                    <div class="pwa-section-body">
+                        <div class="new-concept-tip" id="oxfordStatusHint">内置书籍已准备就绪</div>
+                    </div>
+                </div>
+
+                <div class="pwa-section">
+                    <div class="pwa-section-body">
+                        <div class="oxford-reader">
+                            <aside class="oxford-sidebar">
+                                <div class="oxford-sidebar-header">
+                                    <div class="pwa-search-box" style="max-width: none;">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" id="oxfordSearchInput" class="pwa-search-input" placeholder="搜索书名/章节...">
+                                    </div>
+                                </div>
+                                <div class="oxford-bookmarks" id="oxfordBookmarks"></div>
+                                <div class="oxford-nav" id="oxfordNav"></div>
+                            </aside>
+
+                            <section class="oxford-main">
+                                <div class="oxford-toolbar">
+                                    <div class="oxford-toolbar-left">
+                                        <button type="button" class="pwa-btn secondary" id="oxfordPrevBtn" aria-label="上一章">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordNextBtn" aria-label="下一章">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordFontDownBtn" aria-label="减小字号">
+                                            A-
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordFontUpBtn" aria-label="增大字号">
+                                            A+
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordFontFamilyBtn" aria-label="切换字体">
+                                            <i class="fas fa-font"></i>
+                                        </button>
+                                    </div>
+                                    <div class="oxford-book-meta" id="oxfordBookMeta">未加载</div>
+                                    <div class="oxford-toolbar-right">
+                                        <button type="button" class="pwa-btn secondary" id="oxfordThemeBtn" aria-label="切换夜间模式">
+                                            <i class="fas fa-moon"></i>
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordBookmarkBtn" aria-label="添加书签">
+                                            <i class="far fa-bookmark"></i>
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordExportChapterBtn" aria-label="导出当前章节">
+                                            <i class="fas fa-file-export"></i>
+                                        </button>
+                                        <button type="button" class="pwa-btn secondary" id="oxfordResumeBtn">
+                                            <i class="fas fa-play"></i> 继续阅读
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="oxfordRendition">
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 导入弹窗 -->
+    <div id="gkImportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>导入名句 PDF</h3>
+                <button type="button" class="modal-close" onclick="document.getElementById('gkImportModal').classList.remove('active')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择 PDF 文件</label>
+                    <input type="file" id="gkPdfInput" accept=".pdf" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>解析预览 (自动提取文本)</label>
+                    <textarea id="gkImportPreview" class="form-control" rows="10" placeholder="解析后的文本将显示在这里..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="app.parsePdfText()">解析文本</button>
+                    <button class="btn-primary" onclick="app.processImportText()">确认导入</button>
+                </div>
+                <div class="form-actions" style="margin-top: 0.75rem;">
+                    <a class="btn-secondary" href="中国古代名句辞典(修订本).1_副本.pdf" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-up-right-from-square"></i> 打开当前PDF
+                    </a>
+                </div>
+                <p class="text-sm text-muted">提示：系统将尝试按行分割识别名句。</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="gkSettingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>背诵计划设置</h3>
+                <button type="button" class="modal-close" onclick="document.getElementById('gkSettingsModal').classList.remove('active')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>每日新词上限</label>
+                    <input type="number" id="gkNewLimit" class="form-control" min="0" max="100" value="10">
+                    <p class="text-sm text-muted">每天学习的新名句数量 (0 表示不限)</p>
+                </div>
+                <div class="form-group">
+                    <label>每日复习上限</label>
+                    <input type="number" id="gkReviewLimit" class="form-control" min="0" max="500" value="50">
+                    <p class="text-sm text-muted">每天复习的旧名句数量 (0 表示不限)</p>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-primary" onclick="app.saveGkSettingsFromModal()">保存设置</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gkManualAddModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>手动添加名句</h3>
+                <button type="button" class="modal-close" onclick="document.getElementById('gkManualAddModal').classList.remove('active')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>名句原文</label>
+                    <textarea id="gkManualContent" class="form-control" rows="2" placeholder="例如：学而时习之，不亦说乎？"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>作者</label>
+                    <input type="text" id="gkManualAuthor" class="form-control" placeholder="例如：孔子（可留空）">
+                </div>
+                <div class="form-group">
+                    <label>出处</label>
+                    <input type="text" id="gkManualSource" class="form-control" placeholder="例如：论语·学而（可留空）">
+                </div>
+                <div class="form-group">
+                    <label>释义</label>
+                    <textarea id="gkManualMeaning" class="form-control" rows="3" placeholder="可留空"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-primary" onclick="app.addGkQuoteFromModal()">添加这一句</button>
+                </div>
+
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.12); margin: 1rem 0;">
+
+                <div class="form-group">
+                    <label>批量添加（每行一条）</label>
+                    <textarea id="gkBulkInput" class="form-control" rows="6" placeholder="支持格式：\n1) 只写原文\n2) 原文|作者|出处|释义"></textarea>
+                    <p class="text-sm text-muted">作者/出处/释义可省略；系统会自动去重。</p>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-secondary" onclick="app.addGkQuotesBulkFromModal()">批量添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 读书模块页面 -->
+                <div id="readingModule" class="learning-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-book-reader"></i> 读书模块</h1>
+                                <p class="pwa-subtitle">结构化记录与计划同步</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3>读书计划</h3>
+                                </div>
+                            </div>
+
+                            <div class="pwa-section-body">
+                                <form id="readingForm" class="reading-form">
+                                    <input type="hidden" id="readingPlanId">
+                                    
+                                    <div class="reading-form-grid">
+                                        <div class="form-group">
+                                            <label for="readingBookTitle">书名<span class="required">*</span></label>
+                                            <input type="text" id="readingBookTitle" maxlength="100" required placeholder="请输入书名（最多100字）">
+                                            <div class="field-error" id="readingBookTitleError"></div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="readingStatus">阅读状态<span class="required">*</span></label>
+                                            <select id="readingStatus" required>
+                                                <option value="" disabled selected>请选择阅读状态</option>
+                                                <option value="已读完">已读完</option>
+                                                <option value="正在读">正在读</option>
+                                                <option value="未读完">未读完</option>
+                                            </select>
+                                            <div class="field-error" id="readingStatusError"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="reading-form-grid">
+                                        <div class="form-group">
+                                            <label for="readingStartDate">开始阅读时间<span class="required">*</span></label>
+                                            <input type="date" id="readingStartDate" required>
+                                            <div class="quick-date-row" data-target="readingStartDate">
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="today">今天</button>
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="yesterday">昨天</button>
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="this_monday">本周一</button>
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="month_start">本月1号</button>
+                                            </div>
+                                            <div class="field-error" id="readingStartDateError"></div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="readingEndDate">结束阅读时间</label>
+                                            <input type="date" id="readingEndDate">
+                                            <div class="quick-date-row" data-target="readingEndDate">
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="today">今天</button>
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="plus_7">+7天</button>
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="plus_30">+30天</button>
+                                                <button type="button" class="btn btn-outline btn-sm" data-quick-date="clear">清空</button>
+                                            </div>
+                                            <div class="field-error" id="readingEndDateError"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>计划阅读时间<span class="required">*</span></label>
+                                        <div class="recurrence-type-selector reading-recurrence-selector">
+                                            <label class="radio-option">
+                                                <input type="radio" name="readingRecurrenceType" value="daily" checked>
+                                                <span>每日</span>
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="readingRecurrenceType" value="weekly">
+                                                <span>每周</span>
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="readingRecurrenceType" value="monthly">
+                                                <span>每月</span>
+                                            </label>
+                                            <label class="radio-option">
+                                                <input type="radio" name="readingRecurrenceType" value="custom">
+                                                <span>自定义</span>
+                                            </label>
+                                        </div>
+                                        <div class="field-error" id="readingRecurrenceTypeError"></div>
+                                    </div>
+
+                                    <div id="readingWeeklyOptions" class="reading-options" style="display: none;">
+                                        <div class="form-group">
+                                            <label>每周重复日期<span class="required">*</span></label>
+                                            <div class="weekday-selector">
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="0">
+                                                    <span>日</span>
+                                                </label>
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="1">
+                                                    <span>一</span>
+                                                </label>
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="2">
+                                                    <span>二</span>
+                                                </label>
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="3">
+                                                    <span>三</span>
+                                                </label>
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="4">
+                                                    <span>四</span>
+                                                </label>
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="5">
+                                                    <span>五</span>
+                                                </label>
+                                                <label class="checkbox-option">
+                                                    <input type="checkbox" name="readingWeekdays" value="6">
+                                                    <span>六</span>
+                                                </label>
+                                            </div>
+                                            <div class="field-error" id="readingWeekdaysError"></div>
+                                        </div>
+                                    </div>
+
+                                    <div id="readingCustomOptions" class="reading-options" style="display: none;">
+                                        <div class="reading-form-grid">
+                                            <div class="form-group">
+                                                <label for="readingCustomCount">重复次数<span class="required">*</span></label>
+                                                <input type="number" id="readingCustomCount" min="1" inputmode="numeric" placeholder="例如：10">
+                                                <div class="field-error" id="readingCustomCountError"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="readingCustomInterval">间隔周期<span class="required">*</span></label>
+                                                <div class="reading-custom-interval">
+                                                    <input type="number" id="readingCustomInterval" min="1" value="1" inputmode="numeric">
+                                                    <select id="readingCustomUnit">
+                                                        <option value="day">天</option>
+                                                        <option value="week">周</option>
+                                                        <option value="month">月</option>
+                                                    </select>
+                                                </div>
+                                                <div class="field-error" id="readingCustomIntervalError"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions reading-actions">
+                                        <button type="button" class="btn btn-secondary" id="readingResetBtn"><i class="fas fa-rotate-left"></i> 清空</button>
+                                        <button type="submit" class="btn btn-primary" id="readingSaveBtn"><i class="fas fa-check"></i> 保存并同步</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3>我的读书计划</h3>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="reading-plans-list" id="readingPlansList">
+                                    <div class="empty-state">
+                                        <i class="fas fa-book-open"></i>
+                                        <p>还没有创建读书计划</p>
+                                        <p class="empty-hint">填写上方表单并保存即可生成</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="timetableModule" class="learning-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-table"></i> 校园课程表</h1>
+                                <p class="pwa-subtitle">周视图课程表</p>
+                            </div>
+                            <div class="pwa-header-actions">
+                                <button type="button" class="btn btn-outline btn-icon ui-tooltip" id="timetableOpenSettingsBtn" data-tooltip="设置" aria-label="打开课程表设置">
+                                    <i class="fas fa-gear"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3>课程表</h3>
+                                    <div class="plan-stats">
+                                        <span class="stat">本周: <span id="timetableWeekLabel">-</span></span>
+                                        <span class="stat">课程数: <span id="timetableCourseCount">0</span></span>
+                                        <span class="stat">教学周: <span id="timetableTeachingWeek">-</span></span>
+                                        <span class="stat">ISO周: <span id="timetableIsoWeek">-</span></span>
+                                    </div>
+                                </div>
+                                <div class="pwa-section-actions header-actions">
+                                    <button type="button" class="btn btn-outline btn-icon ui-tooltip" id="timetablePrevWeekBtn" data-tooltip="上一周" aria-label="上一周">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline btn-icon ui-tooltip" id="timetableTodayBtn" data-tooltip="回到本周" aria-label="回到本周">
+                                        <i class="fas fa-home"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline btn-icon ui-tooltip" id="timetableNextWeekBtn" data-tooltip="下一周" aria-label="下一周">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="timetable-grid-wrap">
+                                    <div class="timetable-grid" id="timetableGrid"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 待办日历系统 -->
+            <section id="todo-calendar" class="system-section">
+                <div class="pwa-header">
+                    <div class="pwa-header-content">
+                        <div class="pwa-header-title">
+                            <h1><i class="fas fa-calendar-alt"></i> 待办日历</h1>
+                            <p class="pwa-subtitle">规划你的每一天</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pwa-container">
+                    <div class="learning-header">
+                        <h3>每日日程规划</h3>
+                        <div class="learning-controls">
+                            <button class="btn btn-primary" id="todo-prev-month">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <select id="todo-year-select" class="btn"></select>
+                            <select id="todo-month-select" class="btn"></select>
+                            <button class="btn btn-primary" id="todo-next-month">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button class="btn btn-success" id="todo-go-to-today">
+                                <i class="fas fa-home"></i> 今日
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <div class="weekday">一</div>
+                            <div class="weekday">二</div>
+                            <div class="weekday">三</div>
+                            <div class="weekday">四</div>
+                            <div class="weekday">五</div>
+                            <div class="weekday">六</div>
+                            <div class="weekday">日</div>
+                        </div>
+                        <div class="calendar-grid" id="todo-calendar-grid"></div>
+                    </div>
+
+                    <div class="schedule-container">
+                        <div class="schedule-header">
+                            <h3 id="todo-selected-date-title">选择日期查看日程</h3>
+                            <button class="btn btn-success" id="todo-add-schedule">
+                                <i class="fas fa-plus"></i> 添加日程
+                            </button>
+                        </div>
+                        <div class="schedule-list" id="todo-schedule-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 清单系统 -->
+            <section id="checklist" class="system-section">
+                <div class="pwa-header">
+                    <div class="pwa-header-content">
+                        <div class="pwa-header-title">
+                            <h1><i class="fas fa-list-check"></i> 清单系统</h1>
+                            <p class="pwa-subtitle">任务管理和优先级排序</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pwa-container">
+                    <div class="pwa-metrics-grid">
+                        <div class="pwa-metric-card primary">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>今日任务</h3>
+                                <div class="pwa-metric-value" id="checklistTodayCount">0</div>
+                                <p class="pwa-metric-label">待完成任务</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card success">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>已完成</h3>
+                                <div class="pwa-metric-value" id="checklistCompletedCount">0</div>
+                                <p class="pwa-metric-label">今日完成</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card warning">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>进行中</h3>
+                                <div class="pwa-metric-value" id="checklistInProgressCount">0</div>
+                                <p class="pwa-metric-label">正在处理</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-section">
+                        <div class="pwa-section-header">
+                            <h2>任务列表</h2>
+                            <button class="pwa-btn primary" id="addChecklistTaskBtn">
+                                <i class="fas fa-plus"></i> 添加任务
+                            </button>
+                        </div>
+                        <div id="checklistTaskContainer">
+                            <div class="pwa-empty-state">
+                                <i class="fas fa-list-check"></i>
+                                <h3>还没有任务</h3>
+                                <p>点击"添加任务"按钮开始创建您的第一个任务</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 清单任务模态框 -->
+            <div id="checklistModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="checklistModalTitle">添加任务</h3>
+                        <button type="button" class="modal-close btn-icon ui-tooltip" id="closeChecklistModal" data-tooltip="关闭" aria-label="关闭">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="checklistForm">
+                        <input type="hidden" id="checklistTaskId">
+                        <div class="form-group">
+                            <label for="checklistTitle">任务标题</label>
+                            <input type="text" id="checklistTitle" class="form-control" required placeholder="请输入任务标题">
+                        </div>
+                        <div class="form-group">
+                            <label for="checklistDescription">描述 (可选)</label>
+                            <textarea id="checklistDescription" class="form-control" rows="3" placeholder="任务详细描述"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="checklistPriority">优先级</label>
+                                <select id="checklistPriority" class="form-control">
+                                    <option value="high">高</option>
+                                    <option value="medium" selected>中</option>
+                                    <option value="low">低</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="checklistStatus">状态</label>
+                                <select id="checklistStatus" class="form-control">
+                                    <option value="pending" selected>待处理</option>
+                                    <option value="in_progress">进行中</option>
+                                    <option value="completed">已完成</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" id="cancelChecklist"><i class="fas fa-times"></i> 取消</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> 保存任务</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <section id="finance" class="system-section">
+                <div id="financeHome" class="finance-home">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-chart-line"></i> 财务系统</h1>
+                                <p class="pwa-subtitle">管理财务，规划未来</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <div class="finance-modules">
+                        <div class="module-card" data-module="financeDashboard" role="button" tabindex="0" aria-label="打开财务面板">
+                            <div class="module-icon">
+                                <i class="fas fa-dashboard"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>财务面板</h3>
+                                <p>总览财务状况和关键指标</p>
+                                <div class="module-stats">
+                                    <span class="stat">总资产: <span id="totalAssets">¥0</span></span>
+                                    <span class="stat">总负债: <span id="totalLiabilities">¥0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card" data-module="assets" role="button" tabindex="0" aria-label="打开资产管理">
+                            <div class="module-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>资产</h3>
+                                <p>管理所有金融资产</p>
+                                <div class="module-stats">
+                                    <span class="stat">资产类别: <span id="assetCategories">0</span></span>
+                                    <span class="stat">资产数量: <span id="assetCount">0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card" data-module="repaymentPlans" role="button" tabindex="0" aria-label="打开还款计划">
+                            <div class="module-icon">
+                                <i class="fas fa-receipt"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>还款计划</h3>
+                                <p>管理贷款和还款安排</p>
+                                <div class="module-stats">
+                                    <span class="stat">待还金额: <span id="repaymentAmount">¥0</span></span>
+                                    <span class="stat">还款计划: <span id="repaymentCount">0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card" data-module="savings" role="button" tabindex="0" aria-label="打开储蓄管理">
+                            <div class="module-icon">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>存钱</h3>
+                                <p>管理储蓄目标和进度</p>
+                                <div class="module-stats">
+                                    <span class="stat">储蓄目标: <span id="savingsGoal">¥0</span></span>
+                                    <span class="stat">已存金额: <span id="savingsAmount">¥0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card" data-module="investments" role="button" tabindex="0" aria-label="打开投资管理">
+                            <div class="module-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>投资</h3>
+                                <p>管理投资组合和收益</p>
+                                <div class="module-stats">
+                                    <span class="stat">投资项目: <span id="investmentCount">0</span></span>
+                                    <span class="stat">投资收益: <span id="investmentReturn">¥0</span></span>
+                                </div>
+                            </div>
+                            <div class="module-action">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="module-card coming-soon">
+                            <div class="module-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="module-info">
+                                <h3>报表分析</h3>
+                                <p>财务数据可视化分析</p>
+                                <div class="module-stats">
+                                    <span class="stat">开发中</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- 财务面板仪表盘页面 -->
+                <div id="financeDashboardModule" class="finance-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-dashboard"></i> 财务面板</h1>
+                                <p class="pwa-subtitle">总览财务状况和关键指标</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <div class="finance-header">
+                            <h3>财务概览</h3>
+                        </div>
+                        
+                        <!-- 财务仪表盘指标 -->
+                        <div class="finance-dashboard-metrics">
+                            <div class="metric-card">
+                                <div class="metric-icon total-assets">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>总资产</h4>
+                                    <p class="metric-value" id="dashboardTotalAssets">¥0</p>
+                                    <p class="metric-change positive">+¥0 (0%)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon total-liabilities">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>总负债</h4>
+                                    <p class="metric-value" id="dashboardTotalLiabilities">¥0</p>
+                                    <p class="metric-change negative">-¥0 (0%)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon net-worth">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>净资产</h4>
+                                    <p class="metric-value" id="dashboardNetWorth">¥0</p>
+                                    <p class="metric-change positive">+¥0 (0%)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon monthly-income">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>本月收入</h4>
+                                    <p class="metric-value" id="dashboardMonthlyIncome">¥0</p>
+                                    <p class="metric-change positive">+¥0 (0%)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon monthly-expenses">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>本月支出</h4>
+                                    <p class="metric-value" id="dashboardMonthlyExpenses">¥0</p>
+                                    <p class="metric-change negative">-¥0 (0%)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="metric-card">
+                                <div class="metric-icon savings-rate">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                                <div class="metric-content">
+                                    <h4>储蓄率</h4>
+                                    <p class="metric-value" id="dashboardSavingsRate">0%</p>
+                                    <p class="metric-change positive">+0% (0%)</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 资产负债表概览 -->
+                        <div class="finance-section">
+                            <h4>资产负债表</h4>
+                            <div class="balance-sheet">
+                                <div class="balance-column">
+                                    <h5>资产</h5>
+                                    <div class="balance-items" id="balanceSheetAssets">
+                                        <!-- 资产项将通过JavaScript动态生成 -->
+                                    </div>
+                                </div>
+                                <div class="balance-column">
+                                    <h5>负债</h5>
+                                    <div class="balance-items" id="balanceSheetLiabilities">
+                                        <!-- 负债项将通过JavaScript动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 近期交易 -->
+                        <div class="finance-section">
+                            <h4>近期交易</h4>
+                            <div class="recent-transactions" id="recentTransactions">
+                                <!-- 交易记录将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 还款计划模块页面 - PWA设计风格 -->
+                <div id="repaymentPlansModule" class="finance-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-receipt"></i> 还款计划</h1>
+                                <p class="pwa-subtitle">管理您的贷款和还款安排</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                            <!-- 还款概览卡片 - PWA风格 -->
+                        <div class="pwa-metrics-grid">
+                            <div class="pwa-metric-card primary">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="pwa-metric-content">
+                                    <span class="pwa-metric-label">总待还金额</span>
+                                    <span class="pwa-metric-value" id="totalRepaymentAmount">¥0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-metric-card warning">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="pwa-metric-content">
+                                    <span class="pwa-metric-label">本月待还</span>
+                                    <span class="pwa-metric-value" id="monthlyRepaymentAmount">¥0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-metric-card info">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                                <div class="pwa-metric-content">
+                                    <span class="pwa-metric-label">还款计划数</span>
+                                    <span class="pwa-metric-value" id="repaymentPlanCount">0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-metric-card success">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="pwa-metric-content">
+                                    <span class="pwa-metric-label">还款进度</span>
+                                    <span class="pwa-metric-value" id="repaymentProgress">0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 还款图表 -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3><i class="fas fa-chart-pie"></i> 债务分布</h3>
+                                </div>
+                            </div>
+                            <div class="pwa-chart-container" style="padding: 1.5rem; height: 300px; display: flex; justify-content: center;">
+                                <canvas id="repaymentChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- 还款计划表格 - PWA设计风格 -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3>还款计划明细</h3>
+                                    <span class="pwa-section-badge" id="repaymentTableCount">0 项</span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button class="pwa-btn secondary" id="exportRepaymentDataBtn" style="margin-right: 8px;">
+                                        <i class="fas fa-file-export"></i> 导出数据
+                                    </button>
+                                    <button class="pwa-btn secondary" id="refreshRepaymentDataBtn">
+                                        <i class="fas fa-sync-alt"></i> 刷新数据
+                                    </button>
+                                    <button class="pwa-btn primary" id="recordPaymentBtn">
+                                        <i class="fas fa-plus"></i> 记录还款
+                                    </button>
+                                    <button class="pwa-btn secondary" id="prepaymentBtn">
+                                        <i class="fas fa-fast-forward"></i> 提前还款
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 表格控制栏 - PWA风格 -->
+                            <div class="pwa-table-controls">
+                                <div class="pwa-search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="repaymentSearch" placeholder="搜索平台名称..." class="pwa-search-input">
+                                </div>
+                                <div class="pwa-filter-controls">
+                                    <div class="pwa-filter-group">
+                                        <label>排序:</label>
+                                        <select id="repaymentSort" class="pwa-select">
+                                            <option value="platform">平台名称</option>
+                                            <option value="dueDate">还款日</option>
+                                            <option value="totalAmount">总金额</option>
+                                            <option value="monthlyPayment">月还款</option>
+                                            <option value="balance">剩余金额</option>
+                                            <option value="progress">进度</option>
+                                        </select>
+                                    </div>
+                                    <div class="pwa-filter-group">
+                                        <label>顺序:</label>
+                                        <select id="repaymentOrder" class="pwa-select">
+                                            <option value="asc">升序</option>
+                                            <option value="desc">降序</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-table-container">
+                                <table class="pwa-table">
+                                    <thead>
+                                        <tr>
+                                            <th data-sort="platform">平台 <i class="fas fa-sort"></i></th>
+                                            <th data-sort="dueDate">还款日 <i class="fas fa-sort"></i></th>
+                                            <th data-sort="totalAmount">总金额 <i class="fas fa-sort"></i></th>
+                                            <th data-sort="monthlyPayment">月还款 <i class="fas fa-sort"></i></th>
+                                            <th data-sort="balance">剩余金额 <i class="fas fa-sort"></i></th>
+                                            <th>已还期数</th>
+                                            <th>总期数</th>
+                                            <th data-sort="progress">进度 <i class="fas fa-sort"></i></th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="repaymentTableBody">
+                                        <!-- 还款计划将通过JavaScript动态生成 -->
+                                        <tr class="pwa-empty-row">
+                                            <td colspan="9">
+                                                <div class="pwa-empty-state">
+                                                    <i class="fas fa-receipt"></i>
+                                                    <p>还没有加载还款计划</p>
+                                                    <p class="pwa-empty-hint">还款计划数据将从Excel文件自动导入</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 还款记录（PWA设计风格） -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3><i class="fas fa-history"></i> 还款记录</h3>
+                                    <span class="pwa-section-badge" id="repaymentRecordsCount">0 项</span>
+                                </div>
+                            </div>
+                            <div class="pwa-table-container">
+                                <div class="pwa-empty-state" id="repaymentRecords">
+                                    <i class="fas fa-history"></i>
+                                    <p>还没有还款记录</p>
+                                    <p class="pwa-empty-hint">记录您的还款情况，跟踪财务状况</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 近期还款提醒 - PWA设计风格 -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h3><i class="fas fa-bell"></i> 近期还款提醒</h3>
+                                    <span class="pwa-section-badge" id="upcomingPaymentsCount">0 项</span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button class="pwa-btn secondary" id="viewAllPaymentsBtn">
+                                        <i class="fas fa-list"></i> 查看全部
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-upcoming-payments" id="upcomingPayments">
+                                <!-- 近期还款将通过JavaScript动态生成 -->
+                                <div class="pwa-empty-payments">
+                                    <i class="fas fa-check-circle"></i>
+                                    <p>暂无近期还款提醒</p>
+                                    <p class="pwa-empty-hint">所有还款计划都已按时完成</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 资产模块页面 - PWA设计风格 -->
+                <div id="assetsModule" class="finance-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-wallet"></i> 资产管理</h1>
+                                <p class="pwa-subtitle">银行账户和现金管理</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <!-- 资产概览 -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>资产总览</h2>
+                                    <span class="pwa-section-badge" id="assetsTotalAmount">¥0</span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button class="pwa-btn primary">
+                                        <i class="fas fa-plus"></i> 添加资产
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-assets-grid" id="assetsList">
+                                <!-- 资产列表将通过JavaScript动态生成 -->
+                                <div class="pwa-empty-state">
+                                    <i class="fas fa-wallet"></i>
+                                    <h3>还没有资产记录</h3>
+                                    <p>点击"添加资产"按钮开始管理您的资产</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 储蓄模块页面 - PWA设计风格 -->
+                <div id="savingsModule" class="finance-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-piggy-bank"></i> 储蓄管理</h1>
+                                <p class="pwa-subtitle">定期存款和理财产品</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <!-- 储蓄概览 -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>储蓄总览</h2>
+                                    <span class="pwa-section-badge" id="savingsTotalAmount">¥0</span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button class="pwa-btn primary">
+                                        <i class="fas fa-plus"></i> 添加储蓄
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-savings-grid" id="savingsList">
+                                <!-- 储蓄列表将通过JavaScript动态生成 -->
+                                <div class="pwa-empty-state">
+                                    <i class="fas fa-piggy-bank"></i>
+                                    <h3>还没有储蓄记录</h3>
+                                    <p>点击"添加储蓄"按钮开始管理您的储蓄计划</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 投资模块页面 - PWA设计风格 -->
+                <div id="investmentsModule" class="finance-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-chart-pie"></i> 投资管理</h1>
+                                <p class="pwa-subtitle">股票、基金和投资组合</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <!-- 投资概览 -->
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>投资总览</h2>
+                                    <span class="pwa-section-badge" id="investmentsTotalAmount">¥0</span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button class="pwa-btn primary">
+                                        <i class="fas fa-plus"></i> 添加投资
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-investments-grid" id="investmentsList">
+                                <!-- 投资列表将通过JavaScript动态生成 -->
+                                <div class="pwa-empty-state">
+                                    <i class="fas fa-chart-pie"></i>
+                                    <h3>还没有投资记录</h3>
+                                    <p>点击"添加投资"按钮开始管理您的投资组合</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- 生活系统 -->
+            <section id="life" class="system-section">
+                <div id="lifeHome" class="life-home">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-heart"></i> 生活系统</h1>
+                                <p class="pwa-subtitle">习惯追踪和健康管理</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-container">
+                        <div class="pwa-metrics-grid">
+                            <div class="pwa-metric-card primary">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <div class="pwa-metric-info">
+                                    <h3>今日习惯</h3>
+                                    <div class="pwa-metric-value">0</div>
+                                    <p class="pwa-metric-label">已完成习惯</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-metric-card success">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <div class="pwa-metric-info">
+                                    <h3>睡眠质量</h3>
+                                    <div class="pwa-metric-value" id="lifeSleepQualityValue">0h</div>
+                                    <p class="pwa-metric-label" id="lifeSleepQualityLabel">平均睡眠时长</p>
+                                </div>
+                            </div>
+                            
+                            <div class="pwa-metric-card warning">
+                                <div class="pwa-metric-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div class="pwa-metric-info">
+                                    <h3>饮食记录</h3>
+                                    <div class="pwa-metric-value">0</div>
+                                    <p class="pwa-metric-label">今日记录</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <h2>模块</h2>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="life-modules">
+                                    <div class="module-card" data-module="metamorphosis" role="button" tabindex="0" aria-label="打开蜕变模块">
+                                        <div class="module-icon">
+                                            <i class="fas fa-mountain"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h3>蜕变</h3>
+                                            <p>设定连胜目标与每日打卡，专注自制力提升</p>
+                                            <div class="module-stats">
+                                                <span class="stat">目标: <span id="metamorphosisTargetDays">7</span> 天</span>
+                                                <span class="stat">当前连胜: <span id="metamorphosisCurrentStreak">0</span> 天</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-action">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </div>
+                                    <div class="module-card" data-module="sleepRoutine" role="button" tabindex="0" aria-label="打开早睡早起模块">
+                                        <div class="module-icon">
+                                            <i class="fas fa-bed"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h3>早睡早起</h3>
+                                            <p>设定目标睡觉时间 · 每日打卡 · 睡眠数据分析</p>
+                                            <div class="module-stats">
+                                                <span class="stat">目标: <span id="sleepRoutineTargetBedtimeStat">--:--</span></span>
+                                                <span class="stat">连胜: <span id="sleepRoutineCurrentStreakStat">0</span> 天</span>
+                                            </div>
+                                        </div>
+                                        <div class="module-action">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <h2>习惯追踪</h2>
+                                <button class="pwa-btn primary">
+                                    <i class="fas fa-plus"></i> 添加习惯
+                                </button>
+                            </div>
+                            <div class="pwa-empty-state">
+                                <i class="fas fa-heart"></i>
+                                <h3>还没有习惯记录</h3>
+                                <p>点击"添加习惯"按钮开始追踪您的健康生活</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="sleepRoutineModule" class="life-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-bed"></i> 早睡早起</h1>
+                                <p class="pwa-subtitle">目标设定 · 每日打卡 · 睡眠数据</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>目标</h2>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button type="button" class="pwa-btn primary" id="sleepRoutineSaveTargetBtn">
+                                        <i class="fas fa-save"></i> 保存目标
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="pwa-table-controls" style="align-items: flex-end;">
+                                    <div class="form-group" style="margin: 0; min-width: 240px;">
+                                        <label for="sleepRoutineTargetBedtime">目标睡觉时间</label>
+                                        <input type="time" id="sleepRoutineTargetBedtime" class="form-control" value="23:00">
+                                    </div>
+                                    <div class="form-group" style="margin: 0; min-width: 240px;">
+                                        <label for="sleepRoutineCheckinSchedule">打卡频率</label>
+                                        <select id="sleepRoutineCheckinSchedule" class="form-control">
+                                            <option value="daily">7日（每天）</option>
+                                            <option value="workday">工作日</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="new-concept-tip" id="sleepRoutineTargetHint"></div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>今日打卡</h2>
+                                    <span class="pwa-section-badge" id="sleepRoutineTodayBadge"></span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button type="button" class="pwa-btn primary" id="sleepRoutineSaveRecordBtn">
+                                        <i class="fas fa-check"></i> 保存打卡
+                                    </button>
+                                    <button type="button" class="pwa-btn danger" id="sleepRoutineDeleteRecordBtn">
+                                        <i class="fas fa-trash"></i> 删除当日
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="pwa-table-controls" style="align-items: flex-end;">
+                                    <div class="form-group" style="margin: 0; min-width: 240px;">
+                                        <label for="sleepRoutineBedtimeInput">入睡时间</label>
+                                        <input type="time" id="sleepRoutineBedtimeInput" class="form-control">
+                                    </div>
+                                    <button type="button" class="pwa-btn secondary" id="sleepRoutineBedtimeNowBtn">
+                                        <i class="fas fa-clock"></i> 现在入睡
+                                    </button>
+                                    <div class="form-group" style="margin: 0; min-width: 240px;">
+                                        <label for="sleepRoutineWakeInput">起床时间</label>
+                                        <input type="time" id="sleepRoutineWakeInput" class="form-control">
+                                    </div>
+                                    <button type="button" class="pwa-btn secondary" id="sleepRoutineWakeNowBtn">
+                                        <i class="fas fa-sun"></i> 现在起床
+                                    </button>
+                                </div>
+                                <div class="new-concept-tip" id="sleepRoutineTodayHint"></div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <h2>睡眠数据</h2>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="pwa-metrics-grid">
+                                    <div class="pwa-metric-card primary">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-moon"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>平均睡眠</h3>
+                                            <div class="pwa-metric-value" id="sleepRoutineAvgDuration">0h</div>
+                                            <p class="pwa-metric-label" id="sleepRoutineAvgDurationLabel">近7天</p>
+                                        </div>
+                                    </div>
+                                    <div class="pwa-metric-card success">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-check-double"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>早睡达标</h3>
+                                            <div class="pwa-metric-value" id="sleepRoutineOnTimeRate">0%</div>
+                                            <p class="pwa-metric-label">近7天达标率</p>
+                                        </div>
+                                    </div>
+                                    <div class="pwa-metric-card info">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-sun"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>平均起床</h3>
+                                            <div class="pwa-metric-value" id="sleepRoutineAvgWake">--:--</div>
+                                            <p class="pwa-metric-label">近7天</p>
+                                        </div>
+                                    </div>
+                                    <div class="pwa-metric-card warning">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>连胜</h3>
+                                            <div class="pwa-metric-value" id="sleepRoutineCurrentStreak">0</div>
+                                            <p class="pwa-metric-label">合格天数</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pwa-section" style="margin-top: 1.25rem;">
+                                    <div class="pwa-section-header">
+                                        <h2>最近记录</h2>
+                                    </div>
+                                    <div class="pwa-section-body">
+                                        <div class="pwa-table-container">
+                                            <table class="pwa-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>日期</th>
+                                                        <th>入睡</th>
+                                                        <th>起床</th>
+                                                        <th>时长</th>
+                                                        <th>早睡</th>
+                                                        <th>操作</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="sleepRoutineRecordsBody"></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="metamorphosisModule" class="life-module-page" style="display: none;">
+                    <div class="pwa-header">
+                        <div class="pwa-header-content">
+                            <button type="button" class="pwa-back-btn back-to-home ui-tooltip" data-tooltip="返回" aria-label="返回">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <div class="pwa-header-title">
+                                <h1><i class="fas fa-mountain"></i> 蜕变</h1>
+                                <p class="pwa-subtitle">目标、打卡与进度可视化</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pwa-container metamorphosis" id="metamorphosisRoot" data-theme="mountain">
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>目标与主题</h2>
+                                    <span class="pwa-section-badge" id="metamorphosisProgressBadge">0 / 7</span>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="metamorphosis-settings">
+                                    <div class="metamorphosis-control">
+                                        <div class="metamorphosis-control-label">连胜目标</div>
+                                        <div class="metamorphosis-pill-group" id="metamorphosisTargetButtons" role="group" aria-label="连胜目标">
+                                            <button type="button" class="metamorphosis-pill" data-value="5">5 天</button>
+                                            <button type="button" class="metamorphosis-pill" data-value="7">7 天</button>
+                                            <button type="button" class="metamorphosis-pill" data-value="12">12 天</button>
+                                            <button type="button" class="metamorphosis-pill" data-value="15">15 天</button>
+                                            <button type="button" class="metamorphosis-pill" data-value="custom">自定义</button>
+                                        </div>
+                                        <label for="metamorphosisTargetSelect" class="sr-only">连胜目标</label>
+                                        <select id="metamorphosisTargetSelect" class="form-control sr-only">
+                                            <option value="5">5 天</option>
+                                            <option value="7" selected>7 天</option>
+                                            <option value="12">12 天</option>
+                                            <option value="15">15 天</option>
+                                            <option value="custom">自定义</option>
+                                        </select>
+                                    </div>
+                                    <div class="metamorphosis-control" id="metamorphosisCustomTargetGroup" style="display: none;">
+                                        <label class="metamorphosis-control-label" for="metamorphosisCustomTargetDays">自定义天数</label>
+                                        <input id="metamorphosisCustomTargetDays" class="form-control" inputmode="numeric" type="number" min="1" step="1" placeholder="如：21">
+                                    </div>
+                                    <div class="metamorphosis-control">
+                                        <div class="metamorphosis-control-label">主题</div>
+                                        <div class="metamorphosis-pill-group" id="metamorphosisThemeButtons" role="group" aria-label="主题">
+                                            <button type="button" class="metamorphosis-pill" data-value="mountain">
+                                                <i class="fas fa-mountain"></i>
+                                                <span>山峰攀登</span>
+                                            </button>
+                                            <button type="button" class="metamorphosis-pill" data-value="tree">
+                                                <i class="fas fa-seedling"></i>
+                                                <span>树木成长</span>
+                                            </button>
+                                        </div>
+                                        <label for="metamorphosisThemeSelect" class="sr-only">主题</label>
+                                        <select id="metamorphosisThemeSelect" class="form-control sr-only">
+                                            <option value="mountain" selected>山峰攀登</option>
+                                            <option value="tree">树木成长</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="metamorphosis-visual" id="metamorphosisVisual"></div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>每日打卡</h2>
+                                    <span class="pwa-section-badge" id="metamorphosisTodayLabel"></span>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="metamorphosis-checkin-panel">
+                                    <button type="button" class="metamorphosis-checkin-btn" id="metamorphosisOpenCheckinBtn" aria-label="打开今日打卡">
+                                        <div class="metamorphosis-checkin-btn-title">
+                                            <i class="fas fa-check"></i>
+                                            <span id="metamorphosisCheckinBtnTitle">开始今日打卡</span>
+                                        </div>
+                                        <div class="metamorphosis-checkin-btn-sub" id="metamorphosisCheckinBtnSub">两道问题 · 记录成功或面对挫折</div>
+                                        <div class="metamorphosis-checkin-btn-meta" id="metamorphosisCheckinBtnMeta"></div>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <h2>大数据面板</h2>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="pwa-metrics-grid">
+                                    <div class="pwa-metric-card primary">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>当前连胜</h3>
+                                            <div class="pwa-metric-value" id="metamorphosisDashboardCurrentStreak">0</div>
+                                            <p class="pwa-metric-label">天</p>
+                                        </div>
+                                    </div>
+                                    <div class="pwa-metric-card success">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-trophy"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>历史最佳</h3>
+                                            <div class="pwa-metric-value" id="metamorphosisDashboardBestStreak">0</div>
+                                            <p class="pwa-metric-label">天</p>
+                                        </div>
+                                    </div>
+                                    <div class="pwa-metric-card warning">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-chart-simple"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>成功 / 挫折</h3>
+                                            <div class="pwa-metric-value"><span id="metamorphosisSuccessCount">0</span> / <span id="metamorphosisSetbackCount">0</span></div>
+                                            <p class="pwa-metric-label">累计</p>
+                                        </div>
+                                    </div>
+                                    <div class="pwa-metric-card info">
+                                        <div class="pwa-metric-icon">
+                                            <i class="fas fa-bullseye"></i>
+                                        </div>
+                                        <div class="pwa-metric-info">
+                                            <h3>高频诱因</h3>
+                                            <div class="pwa-metric-value" id="metamorphosisTopReason">-</div>
+                                            <p class="pwa-metric-label">挫折原因 Top1</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="metamorphosis-chart-wrap">
+                                    <canvas id="metamorphosisChart" height="240"></canvas>
+                                </div>
+
+                                <div class="metamorphosis-reason-panel" id="metamorphosisReasonPanel">
+                                    <div class="metamorphosis-reason-card">
+                                        <div class="metamorphosis-reason-title">色情内容挫折原因</div>
+                                        <div class="metamorphosis-reason-list" id="metamorphosisPornReasonStats"></div>
+                                    </div>
+                                    <div class="metamorphosis-reason-card">
+                                        <div class="metamorphosis-reason-title">手淫挫折原因</div>
+                                        <div class="metamorphosis-reason-list" id="metamorphosisMasturbationReasonStats"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <div class="pwa-section-title">
+                                    <h2>日历</h2>
+                                    <span class="pwa-section-badge" id="metamorphosisCalendarMonthLabel"></span>
+                                </div>
+                                <div class="pwa-section-actions">
+                                    <button type="button" class="pwa-btn small secondary" id="metamorphosisPrevMonthBtn" aria-label="上个月">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button type="button" class="pwa-btn small secondary" id="metamorphosisNextMonthBtn" aria-label="下个月">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="calendar-container metamorphosis-calendar">
+                                    <div class="calendar-header">
+                                        <div class="weekday">日</div>
+                                        <div class="weekday">一</div>
+                                        <div class="weekday">二</div>
+                                        <div class="weekday">三</div>
+                                        <div class="weekday">四</div>
+                                        <div class="weekday">五</div>
+                                        <div class="weekday">六</div>
+                                    </div>
+                                    <div class="calendar-grid" id="metamorphosisCalendarGrid"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pwa-section">
+                            <div class="pwa-section-header">
+                                <h2>数据备份</h2>
+                            </div>
+                            <div class="pwa-section-body">
+                                <div class="metamorphosis-backup-actions">
+                                    <button type="button" class="pwa-btn secondary" id="exportMetamorphosisDataBtn">
+                                        <i class="fas fa-download"></i> 导出数据
+                                    </button>
+                                    <button type="button" class="pwa-btn secondary" id="importMetamorphosisDataBtn">
+                                        <i class="fas fa-upload"></i> 导入数据
+                                    </button>
+                                    <input id="importMetamorphosisFile" type="file" accept="application/json" hidden>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 工作系统 -->
+            <section id="work" class="system-section">
+                <div class="pwa-header">
+                    <div class="pwa-header-content">
+                        <div class="pwa-header-title">
+                            <h1><i class="fas fa-briefcase"></i> 工作系统</h1>
+                            <p class="pwa-subtitle">项目进度和职业发展</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pwa-container">
+                    <div class="pwa-metrics-grid">
+                        <div class="pwa-metric-card primary">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>进行中项目</h3>
+                                <div class="pwa-metric-value">0</div>
+                                <p class="pwa-metric-label">活跃项目</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card success">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>今日任务</h3>
+                                <div class="pwa-metric-value">0</div>
+                                <p class="pwa-metric-label">已完成任务</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card warning">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>工作时间</h3>
+                                <div class="pwa-metric-value">0h</div>
+                                <p class="pwa-metric-label">今日工作时长</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-section">
+                        <div class="pwa-section-header">
+                            <h2>项目管理</h2>
+                            <button class="pwa-btn primary">
+                                <i class="fas fa-plus"></i> 添加项目
+                            </button>
+                        </div>
+                        <div class="pwa-empty-state">
+                            <i class="fas fa-briefcase"></i>
+                            <h3>还没有项目</h3>
+                            <p>点击"添加项目"按钮开始管理您的工作项目</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 智慧系统 -->
+            <section id="wisdom" class="system-section">
+                <div class="pwa-header">
+                    <div class="pwa-header-content">
+                        <div class="pwa-header-title">
+                            <h1><i class="fas fa-lightbulb"></i> 智慧系统</h1>
+                            <p class="pwa-subtitle">知识积累和思维训练</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pwa-container">
+                    <div class="pwa-metrics-grid">
+                        <div class="pwa-metric-card primary">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-book"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>知识笔记</h3>
+                                <div class="pwa-metric-value">0</div>
+                                <p class="pwa-metric-label">总笔记数量</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card success">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>思维训练</h3>
+                                <div class="pwa-metric-value">0</div>
+                                <p class="pwa-metric-label">今日训练次数</p>
+                            </div>
+                        </div>
+                        
+                        <div class="pwa-metric-card warning">
+                            <div class="pwa-metric-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="pwa-metric-info">
+                                <h3>学习进度</h3>
+                                <div class="pwa-metric-value">0%</div>
+                                <p class="pwa-metric-label">知识掌握度</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pwa-section">
+                        <div class="pwa-section-header">
+                            <h2>知识管理</h2>
+                            <button class="pwa-btn primary">
+                                <i class="fas fa-plus"></i> 添加笔记
+                            </button>
+                        </div>
+                        <div class="pwa-empty-state">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>还没有知识笔记</h3>
+                            <p>点击"添加笔记"按钮开始积累您的智慧</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 待办日历日程模态框 -->
+        <div class="modal" id="todoScheduleModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="todoScheduleModalTitle">添加日程</h3>
+                    <button type="button" class="modal-close btn-icon ui-tooltip" id="todoCloseScheduleModal" data-tooltip="关闭" aria-label="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="todoScheduleId">
+                    <div class="form-group">
+                        <label for="todoScheduleTime">时间</label>
+                        <input type="time" id="todoScheduleTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="todoScheduleContent">日程内容</label>
+                        <textarea id="todoScheduleContent" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="todoSchedulePriority">优先级</label>
+                        <select id="todoSchedulePriority">
+                            <option value="low">低</option>
+                            <option value="medium" selected>中</option>
+                            <option value="high">高</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" id="todoDeleteSchedule" style="display: none;"><i class="fas fa-trash"></i> 删除</button>
+                    <button class="btn btn-success" id="todoSaveSchedule"><i class="fas fa-check"></i> 保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="timetableCourseModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="timetableCourseModalTitle">课程详情</h3>
+                    <button type="button" class="modal-close btn-icon ui-tooltip" id="timetableCloseCourseModal" data-tooltip="关闭" aria-label="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="timetableCourseModalBody"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-danger" id="timetableDeleteCourseBtn"><i class="fas fa-trash"></i> 删除</button>
+                    <button class="btn btn-success" id="timetableEditCourseBtn"><i class="fas fa-pen"></i> 编辑</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="timetableSettingsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>课程表设置</h3>
+                    <button type="button" class="modal-close btn-icon ui-tooltip" id="timetableCloseSettingsModal" data-tooltip="关闭" aria-label="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="timetable-settings-feedback" id="timetableSettingsFeedback" role="status" aria-live="polite"></div>
+
+                    <div class="timetable-settings-grid">
+                        <div class="timetable-card">
+                            <div class="timetable-card-title">学期管理</div>
+                            <div class="timetable-row">
+                                <div class="form-group">
+                                    <label for="timetableSemesterSelect">学期</label>
+                                    <select id="timetableSemesterSelect"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableAcademicYear">学年</label>
+                                    <input id="timetableAcademicYear" type="text" maxlength="20" placeholder="如：2023-2024">
+                                </div>
+                            </div>
+                            <div class="timetable-row">
+                                <div class="form-group">
+                                    <label for="timetableTerm">学期</label>
+                                    <select id="timetableTerm">
+                                        <option value="1">第一学期</option>
+                                        <option value="2">第二学期</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableTimeSchemeSelect">作息方案</label>
+                                    <select id="timetableTimeSchemeSelect"></select>
+                                </div>
+                            </div>
+                            <div class="timetable-row">
+                                <div class="form-group">
+                                    <label for="timetableSemesterStart">开始日期</label>
+                                    <input id="timetableSemesterStart" type="date">
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableSemesterEnd">结束日期</label>
+                                    <input id="timetableSemesterEnd" type="date">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="timetableNewSemesterBtn"><i class="fas fa-plus"></i> 新建</button>
+                                <button type="button" class="btn btn-danger" id="timetableDeleteSemesterBtn"><i class="fas fa-trash"></i> 删除</button>
+                                <button type="button" class="btn btn-primary" id="timetableSaveSemesterBtn"><i class="fas fa-check"></i> 保存</button>
+                            </div>
+                        </div>
+
+                        <div class="timetable-card">
+                            <div class="timetable-card-title">作息方案</div>
+                            <div class="timetable-row">
+                                <div class="form-group">
+                                    <label for="timetableSchemeSelect">方案</label>
+                                    <select id="timetableSchemeSelect"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableSchemeName">名称</label>
+                                    <input id="timetableSchemeName" type="text" maxlength="30" placeholder="如：正常作息">
+                                </div>
+                            </div>
+                            <div class="timetable-periods">
+                                <table class="timetable-table">
+                                    <thead>
+                                        <tr>
+                                            <th>节次</th>
+                                            <th>开始</th>
+                                            <th>结束</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="timetablePeriodsBody"></tbody>
+                                </table>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="timetableAddPeriodBtn"><i class="fas fa-plus"></i> 添加节次</button>
+                                <button type="button" class="btn btn-success" id="timetableNewSchemeBtn"><i class="fas fa-plus"></i> 新建方案</button>
+                                <button type="button" class="btn btn-primary" id="timetableSaveSchemeBtn"><i class="fas fa-check"></i> 保存方案</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timetable-settings-divider"></div>
+
+                    <div class="timetable-card timetable-settings-other">
+                        <div class="timetable-card-title">其他设置</div>
+                        <div class="form-actions timetable-settings-actions">
+                            <button type="button" class="btn btn-outline" id="timetableExportIcsBtn"><i class="fas fa-file-export"></i> 导出 iCalendar</button>
+                            <button type="button" class="btn btn-success" id="timetableResyncBtn"><i class="fas fa-rotate"></i> 重新同步到待办日历</button>
+                        </div>
+
+                        <div class="timetable-settings-subtitle">课程管理</div>
+                        <form id="timetableCourseForm" class="timetable-form timetable-form-compact">
+                            <input type="hidden" id="timetableCourseId">
+                            <div class="timetable-form-grid">
+                                <div class="form-group">
+                                    <label for="timetableCourseName">课程名称<span class="required">*</span></label>
+                                    <input id="timetableCourseName" type="text" maxlength="50" placeholder="如：高等数学">
+                                    <div class="field-error" id="timetableCourseNameError"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableCourseType">课程类型</label>
+                                    <select id="timetableCourseType">
+                                        <option value="required">必修</option>
+                                        <option value="elective">选修</option>
+                                        <option value="lab">实验</option>
+                                        <option value="self">自习</option>
+                                        <option value="exam">考试</option>
+                                        <option value="other" selected>其他</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="timetable-form-grid">
+                                <div class="form-group">
+                                    <label for="timetableCourseWeekday">周几<span class="required">*</span></label>
+                                    <select id="timetableCourseWeekday">
+                                        <option value="1">周一</option>
+                                        <option value="2">周二</option>
+                                        <option value="3">周三</option>
+                                        <option value="4">周四</option>
+                                        <option value="5">周五</option>
+                                        <option value="6">周六</option>
+                                        <option value="7">周日</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableCoursePeriod">节次<span class="required">*</span></label>
+                                    <select id="timetableCoursePeriod"></select>
+                                </div>
+                            </div>
+                            <div id="timetableExamFields" style="display: none;">
+                                <div class="timetable-form-grid">
+                                    <div class="form-group">
+                                        <label for="timetableExamDate">考试日期<span class="required">*</span></label>
+                                        <input id="timetableExamDate" type="date">
+                                        <div class="quick-date-row" data-target="timetableExamDate">
+                                            <button type="button" class="btn btn-outline btn-sm" data-quick-date="today">今天</button>
+                                            <button type="button" class="btn btn-outline btn-sm" data-quick-date="plus_7">+7天</button>
+                                            <button type="button" class="btn btn-outline btn-sm" data-quick-date="plus_30">+30天</button>
+                                            <button type="button" class="btn btn-outline btn-sm" data-quick-date="this_monday">本周一</button>
+                                            <button type="button" class="btn btn-outline btn-sm" data-quick-date="month_start">本月初</button>
+                                            <button type="button" class="btn btn-outline btn-sm" data-quick-date="clear">清空</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>考试节次<span class="required">*</span></label>
+                                        <div class="date-range">
+                                            <div class="date-input-group">
+                                                <label for="timetableExamStartPeriod" class="sr-only">开始节次</label>
+                                                <select id="timetableExamStartPeriod"></select>
+                                            </div>
+                                            <span class="date-separator">至</span>
+                                            <div class="date-input-group">
+                                                <label for="timetableExamEndPeriod" class="sr-only">结束节次</label>
+                                                <select id="timetableExamEndPeriod"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="timetable-form-grid">
+                                    <div class="form-group">
+                                        <label>考试时间<span class="required">*</span></label>
+                                        <div class="time-range">
+                                            <div class="time-input-group">
+                                                <label for="timetableExamStartTime" class="sr-only">开始时间</label>
+                                                <input type="time" id="timetableExamStartTime" placeholder="开始时间">
+                                            </div>
+                                            <span class="time-separator">至</span>
+                                            <div class="time-input-group">
+                                                <label for="timetableExamEndTime" class="sr-only">结束时间</label>
+                                                <input type="time" id="timetableExamEndTime" placeholder="结束时间">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timetable-form-grid">
+                                <div class="form-group">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" id="timetableParityEnabled">
+                                        <span>启用单双周规则</span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableParityType">单双周</label>
+                                    <select id="timetableParityType" disabled>
+                                        <option value="odd">单周（1/3/5...）</option>
+                                        <option value="even">双周（2/4/6...）</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="timetable-form-grid">
+                                <div class="form-group">
+                                    <label for="timetableCourseLocation">上课地点</label>
+                                    <input id="timetableCourseLocation" type="text" maxlength="50" list="timetableClassroomList" placeholder="如：A101">
+                                    <datalist id="timetableClassroomList"></datalist>
+                                </div>
+                                <div class="form-group">
+                                    <label for="timetableCourseColor">颜色</label>
+                                    <input id="timetableCourseColor" type="color" value="#e78367">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary" id="timetableCourseResetBtn"><i class="fas fa-rotate-left"></i> 清空</button>
+                                <button type="submit" class="btn btn-primary" id="timetableCourseSaveBtn"><i class="fas fa-check"></i> 保存课程</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="metamorphosisCheckinModal">
+            <div class="modal-content metamorphosis-checkin-modal">
+                <div class="modal-header">
+                    <h3 id="metamorphosisCheckinModalTitle">今日打卡</h3>
+                    <button type="button" class="modal-close btn-icon ui-tooltip" id="closeMetamorphosisCheckinModal" data-tooltip="关闭" aria-label="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="metamorphosisCheckinForm" class="metamorphosis-checkin-form">
+                        <div class="form-group">
+                            <label>1. 今天是否远离色情内容</label>
+                            <div class="metamorphosis-choice-row">
+                                <label class="metamorphosis-choice">
+                                    <input type="radio" name="metamorphosisPorn" value="success" required>
+                                    <span>成功</span>
+                                </label>
+                                <label class="metamorphosis-choice">
+                                    <input type="radio" name="metamorphosisPorn" value="setback" required>
+                                    <span>面对挫折</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="metamorphosisPornReasonGroup" style="display: none;">
+                            <label for="metamorphosisPornReason">面对挫折原因</label>
+                            <select id="metamorphosisPornReason" class="form-control">
+                                <option value="" selected>请选择原因</option>
+                                <option value="压力">压力</option>
+                                <option value="无聊">无聊</option>
+                                <option value="深夜">深夜</option>
+                                <option value="情绪波动">情绪波动</option>
+                                <option value="社交媒体诱因">社交媒体诱因</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>2. 今天是否成功远离手淫</label>
+                            <div class="metamorphosis-choice-row">
+                                <label class="metamorphosis-choice">
+                                    <input type="radio" name="metamorphosisMasturbation" value="success" required>
+                                    <span>成功</span>
+                                </label>
+                                <label class="metamorphosis-choice">
+                                    <input type="radio" name="metamorphosisMasturbation" value="setback" required>
+                                    <span>面对挫折</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="metamorphosisMasturbationReasonGroup" style="display: none;">
+                            <label for="metamorphosisMasturbationReason">面对挫折原因</label>
+                            <select id="metamorphosisMasturbationReason" class="form-control">
+                                <option value="" selected>请选择原因</option>
+                                <option value="压力">压力</option>
+                                <option value="无聊">无聊</option>
+                                <option value="深夜">深夜</option>
+                                <option value="情绪波动">情绪波动</option>
+                                <option value="社交媒体诱因">社交媒体诱因</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="pwa-btn secondary" id="metamorphosisCheckinCancelBtn">取消</button>
+                    <button type="submit" form="metamorphosisCheckinForm" class="pwa-btn primary" id="metamorphosisCheckinSaveBtn">
+                        <i class="fas fa-check"></i> 保存今日打卡
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 添加学习计划模态框 -->
+        <div class="modal" id="learningPlanModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="learningPlanModalTitle">添加学习计划</h3>
+                    <button type="button" class="modal-close btn-icon ui-tooltip" id="closeLearningPlanModal" data-tooltip="关闭" aria-label="关闭">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="learningPlanForm">
+                        <div class="form-group">
+                            <label for="planTitle">计划标题</label>
+                            <input type="text" id="planTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-option">
+                                <input type="checkbox" id="planBatchMode">
+                                <span>批量添加（每行一个计划）</span>
+                            </label>
+                        </div>
+                        <div class="form-group" id="planBatchContainer" style="display: none;">
+                            <label for="planBatchTitles">计划列表</label>
+                            <textarea id="planBatchTitles" rows="6" placeholder="每行一个标题；也可用“标题 | 描述”"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="planDescription">计划描述</label>
+                            <textarea id="planDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>时间设置</label>
+                            <div class="time-mode-toggle">
+                                <label class="radio-option">
+                                    <input type="radio" name="timeMode" value="period" checked>
+                                    <span>时间段</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="timeMode" value="duration">
+                                    <span>时长</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- 时间段模式 -->
+                        <div id="timePeriodContainer" class="form-group">
+                            <div class="time-range">
+                                <div class="time-input-group">
+                                    <label for="planStartTime" class="sr-only">开始时间</label>
+                                    <input type="time" id="planStartTime" placeholder="开始时间" required>
+                                </div>
+                                <span class="time-separator">至</span>
+                                <div class="time-input-group">
+                                    <label for="planEndTime" class="sr-only">结束时间</label>
+                                    <input type="time" id="planEndTime" placeholder="结束时间" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 时长模式 -->
+                        <div id="timeDurationContainer" class="form-group" style="display: none;">
+                            <div class="duration-selector">
+                                <label for="planDuration">选择时长</label>
+                                <select id="planDuration">
+                                    <option value="5">5分钟</option>
+                                    <option value="10">10分钟</option>
+                                    <option value="15">15分钟</option>
+                                    <option value="30" selected>30分钟</option>
+                                    <option value="60">60分钟</option>
+                                    <option value="custom">自定义</option>
+                                </select>
+                            </div>
+                            <div id="customDurationContainer" class="form-group" style="display: none;">
+                                <label for="planCustomDuration">自定义时长（分钟）</label>
+                                <input type="number" id="planCustomDuration" min="1" max="1440">
+                            </div>
+                            <div class="start-time-selector">
+                                <label for="planDurationStartTime">开始时间</label>
+                                <input type="time" id="planDurationStartTime" placeholder="开始时间" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>重复类型</label>
+                            <div class="recurrence-type-selector">
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="once" checked>
+                                    <span>仅当天</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="daily">
+                                    <span>每天</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="weekly">
+                                    <span>每周</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="monthly">
+                                    <span>每月</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="single_week">
+                                    <span>单周</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="double_week">
+                                    <span>双周</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="recurrenceType" value="custom">
+                                    <span>自定义</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- 自定义重复选项 -->
+                        <div id="customRecurrenceContainer" class="form-group" style="display: none;">
+                            <div class="form-group">
+                                <label for="recurrenceInterval">重复间隔</label>
+                                <input type="number" id="recurrenceInterval" min="1" value="1">
+                                <select id="recurrenceUnit">
+                                    <option value="day">天</option>
+                                    <option value="week">周</option>
+                                    <option value="month">月</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>重复日期（每周）</label>
+                                <div class="weekday-selector">
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="0">
+                                        <span>日</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="1">
+                                        <span>一</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="2">
+                                        <span>二</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="3">
+                                        <span>三</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="4">
+                                        <span>四</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="5">
+                                        <span>五</span>
+                                    </label>
+                                    <label class="checkbox-option">
+                                        <input type="checkbox" name="weekdays" value="6">
+                                        <span>六</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>计划时间范围</label>
+                            <div class="date-range">
+                                <div class="date-input-group">
+                                    <label for="planStartDate" class="sr-only">开始日期</label>
+                                    <input type="date" id="planStartDate" required>
+                                </div>
+                                <span class="date-separator">至</span>
+                                <div class="date-input-group">
+                                    <label for="planEndDate" class="sr-only">结束日期</label>
+                                    <input type="date" id="planEndDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="planPriority">优先级</label>
+                            <select id="planPriority">
+                                <option value="low">低</option>
+                                <option value="medium" selected>中</option>
+                                <option value="high">高</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelLearningPlan"><i class="fas fa-times"></i> 取消</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> 保存</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+        import * as pdfjsLib from './vendor/pdfjs/pdf.min.mjs';
+        window.pdfjsLib = pdfjsLib;
+        if (window.pdfjsLib?.GlobalWorkerOptions) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdfjs/pdf.worker.min.mjs';
+        }
+    </script>
+    <script src="vendor/epubjs/epub.min.js"></script>
+    <script src="scripts/app.js?v=5.0"></script>
+    <script src="scripts/todo-calendar.js?v=1.3"></script>
+</body>
+</html>
