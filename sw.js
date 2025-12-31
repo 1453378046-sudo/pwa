@@ -1,39 +1,44 @@
-const SW_VERSION = '5.0.1';
+const SW_VERSION = '5.0.2';
 const CACHE_NAME = `self-system-${SW_VERSION}`;
-const PRECACHE_URLS = [
+const CORE_URLS = [
     './',
     'index.html',
     '404.html',
-    'manifest.json',
     'manifest.webmanifest',
     'icon.svg',
     'app.js',
     'styles.css',
     'panel/index.html',
-    'calendar/index.html',
+    'calendar/index.html'
+];
+
+const OPTIONAL_URLS = [
+    'manifest.json',
     'styles/main.css?v=4.8',
     'styles/gk.css?v=1.3',
     'styles/pdf-viewer.css?v=1.1',
     'scripts/app.js?v=5.0',
     'scripts/todo-calendar.js?v=1.3',
-    'scripts/pdf-viewer.js',
-    'vendor/fontawesome/css/all.min.css',
-    'vendor/fontawesome/webfonts/fa-solid-900.woff2',
-    'vendor/fontawesome/webfonts/fa-regular-400.woff2',
-    'vendor/fontawesome/webfonts/fa-brands-400.woff2',
-    'vendor/epubjs/epub.min.js',
-    'vendor/pdfjs/pdf.min.mjs',
-    'vendor/pdfjs/pdf.worker.min.mjs'
+    'scripts/pdf-viewer.js'
 ];
+
+const PRECACHE_URLS = [...CORE_URLS, ...OPTIONAL_URLS];
 
 // 安装事件
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                const requests = PRECACHE_URLS.map((url) => new Request(url, { cache: 'reload' }));
-                return cache.addAll(requests);
-            })
+        (async () => {
+            const cache = await caches.open(CACHE_NAME);
+            const requests = PRECACHE_URLS.map((url) => new Request(url, { cache: 'reload' }));
+            await Promise.allSettled(
+                requests.map(async (request) => {
+                    try {
+                        await cache.add(request);
+                    } catch {
+                    }
+                })
+            );
+        })()
     );
     self.skipWaiting();
 });
