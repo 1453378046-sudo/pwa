@@ -2878,11 +2878,22 @@ class SelfSystem {
     }
 
     async loadReadingPlansFromApi() {
+        const hostname = String(window.location.hostname || '').toLowerCase();
+        const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
+        if (!isLocalHost) {
+            this.hideAppStatus();
+            return;
+        }
+
         this.showAppStatus('正在加载读书计划…', 'info');
         try {
             const res = await fetch('/api/reading/plans', { cache: 'no-store' });
             if (!res.ok) {
-                this.showAppStatus('读书计划加载失败：服务不可用', 'warning');
+                if ((this.readingPlans || []).length) {
+                    this.showAppStatus('读书计划已使用本地数据', 'warning');
+                } else {
+                    this.showAppStatus('读书计划加载失败：服务不可用', 'warning');
+                }
                 return;
             }
             const data = await res.json();
@@ -9030,6 +9041,8 @@ class SelfSystem {
         this.oxfordEventsBound = true;
 
         const openBtn = document.getElementById('oxfordOpenDefaultBtn');
+        const pickBtn = document.getElementById('oxfordPickFileBtn');
+        const fileInput = document.getElementById('oxfordFileInput');
         const prevBtn = document.getElementById('oxfordPrevBtn');
         const nextBtn = document.getElementById('oxfordNextBtn');
         const fontDownBtn = document.getElementById('oxfordFontDownBtn');
@@ -9044,6 +9057,13 @@ class SelfSystem {
         const bookmarksEl = document.getElementById('oxfordBookmarks');
 
         openBtn?.addEventListener('click', () => this.openOxfordDefaultEpub());
+        pickBtn?.addEventListener('click', () => fileInput?.click());
+        fileInput?.addEventListener('change', () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            fileInput.value = '';
+            this.openOxfordEpubFromFile(file);
+        });
         prevBtn?.addEventListener('click', () => this.oxfordRendition?.prev?.());
         nextBtn?.addEventListener('click', () => this.oxfordRendition?.next?.());
         resumeBtn?.addEventListener('click', () => this.resumeOxfordReading());
@@ -9445,27 +9465,31 @@ class SelfSystem {
     }
 
     async openOxfordDefaultEpub() {
-        const status = await this.fetchOxfordServerOxfordStatus();
-        const baseUrl = typeof status?.baseUrl === 'string' ? status.baseUrl : '';
-        const fileExists = status?.fileExists !== false;
-
-        if (baseUrl && status?.ready) {
-            const ok = await this.openOxfordEpub(baseUrl);
-            if (ok) return true;
-        }
-
-        if (baseUrl && fileExists) {
-            this.setOxfordStatus('首次准备书籍中…');
-            const ensured = await this.ensureOxfordServerExtracted();
-            if (ensured?.ready) {
-                const ok = await this.openOxfordEpub(baseUrl);
-                if (ok) return true;
-            }
-        }
-
         const fileName = this.oxfordState?.file || '牛津通识读本百本纪念套装（共100册）.epub';
-        const url = encodeURI(fileName);
-        return this.openOxfordEpub(url);
+        const url = encodeURIComponent(fileName);
+        const ok = await this.openOxfordEpub(url);
+        if (!ok) {
+            this.setOxfordStatus('未找到 EPUB 原书文件，可点击「选择EPUB」导入本地文件');
+        }
+        return ok;
+    }
+
+    async openOxfordEpubFromFile(file) {
+        if (typeof window === 'undefined' || typeof window.ePub !== 'function') {
+            this.setOxfordStatus('EPUB 阅读组件未加载，请检查网络或刷新页面');
+            return false;
+        }
+        if (!file) return false;
+        this.setOxfordStatus('正在读取本地 EPUB…');
+        try {
+            const buf = await file.arrayBuffer();
+            const ok = await this.openOxfordEpub(buf, { fileName: file.name });
+            if (!ok) this.setOxfordStatus('加载失败：无法打开 EPUB');
+            return ok;
+        } catch {
+            this.setOxfordStatus('加载失败：无法读取 EPUB');
+            return false;
+        }
     }
 
     async fetchOxfordServerOxfordStatus() {
@@ -9502,7 +9526,7 @@ class SelfSystem {
         return st;
     }
 
-    async openOxfordEpub(url) {
+    async openOxfordEpub(source, options = {}) {
         if (typeof window === 'undefined' || typeof window.ePub !== 'function') {
             this.setOxfordStatus('EPUB 阅读组件未加载，请检查网络或刷新页面');
             return false;
@@ -9527,7 +9551,7 @@ class SelfSystem {
         container.innerHTML = '';
 
         try {
-            const book = window.ePub(url);
+            const book = window.ePub(source);
             this.oxfordBook = book;
             const rendition = book.renderTo('oxfordRendition', {
                 width: '100%',
@@ -9567,7 +9591,12 @@ class SelfSystem {
             this.oxfordNavGroups = this.buildOxfordNavGroups(toc);
             this.renderOxfordNav('');
 
-            this.oxfordState.file = decodeURIComponent(url);
+            const nextFileName = typeof options?.fileName === 'string' && options.fileName.trim() ? options.fileName.trim() : '';
+            if (nextFileName) {
+                this.oxfordState.file = nextFileName;
+            } else if (typeof source === 'string') {
+                this.oxfordState.file = decodeURIComponent(source);
+            }
             this.saveOxfordState();
 
             this.renderOxfordBookmarks();
@@ -10002,6 +10031,10 @@ class SelfSystem {
         }
 
         try {
+            if (!window.pdfjsLib || !window.pdfjsLib.getDocument) {
+                alert('PDF 解析组件未加载，请稍后重试或刷新页面');
+                return;
+            }
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
             let fullText = '';
@@ -10126,6 +10159,7 @@ class SelfSystem {
             this.pdfEventsBound = true;
         }
         this.generatePDFToc();
+        this.goToPage(this.currentPDFPage);
     }
 
     bindPDFEvents() {
@@ -10158,6 +10192,26 @@ class SelfSystem {
             e.preventDefault();
             e.stopPropagation();
             this.toggleToc();
+        });
+
+        const pdfPickBtn = document.getElementById('pdfPickFileBtn');
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        pdfPickBtn?.addEventListener('click', () => pdfFileInput?.click());
+        pdfFileInput?.addEventListener('change', () => {
+            const file = pdfFileInput.files && pdfFileInput.files[0];
+            if (!file) return;
+            pdfFileInput.value = '';
+            try {
+                if (this.pdfFileObjectUrl) URL.revokeObjectURL(this.pdfFileObjectUrl);
+            } catch {
+            }
+            try {
+                this.pdfFileObjectUrl = URL.createObjectURL(file);
+                this.pdfFileBaseUrl = this.pdfFileObjectUrl;
+                this.currentPDFPage = 1;
+                this.goToPage(1);
+            } catch {
+            }
         });
 
         // 点击目录项跳转
@@ -10222,7 +10276,9 @@ class SelfSystem {
         const pageInput = document.getElementById('pdfPageInput');
         
         if (pdfObject) {
-            const url = `中国古代名句辞典(修订本).1_副本.pdf#page=${page}`;
+            const file = '中国古代名句辞典(修订本).1_副本.pdf';
+            const base = this.pdfFileBaseUrl ? String(this.pdfFileBaseUrl) : encodeURIComponent(file);
+            const url = `${base}#page=${page}`;
             const parent = pdfObject.parentNode;
             if (parent) {
                 const cloned = pdfObject.cloneNode(true);
@@ -10596,7 +10652,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('offline', handleConnectivity);
     if (!navigator.onLine) handleConnectivity();
 
-    const swVersion = '5.0.1';
+    const swVersion = '5.0.4';
     const registerServiceWorker = async () => {
         if (!('serviceWorker' in navigator)) return;
         const swUrl = new URL('sw.js', window.location.href);

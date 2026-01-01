@@ -1,4 +1,4 @@
-const SW_VERSION = '5.0.2';
+const SW_VERSION = '5.0.4';
 const CACHE_NAME = `self-system-${SW_VERSION}`;
 const CORE_URLS = [
     './',
