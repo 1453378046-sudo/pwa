@@ -420,6 +420,16 @@
 @media (max-width: 900px) {
     .oxford-reader {
         grid-template-columns: 1fr;
+        height: auto;
+        min-height: 70vh;
+    }
+    .oxford-sidebar,
+    .oxford-main {
+        height: auto;
+        min-height: 0;
+    }
+    #oxfordRendition {
+        min-height: 60vh;
     }
     .oxford-book-meta {
         max-width: 100%;

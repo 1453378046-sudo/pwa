@@ -2877,6 +2877,133 @@ class SelfSystem {
         }
     }
 
+    isHostedEnvironment() {
+        const hostname = String(window.location.hostname || '').toLowerCase();
+        return !(hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '');
+    }
+
+    loadAssetOverrides() {
+        try {
+            const raw = localStorage.getItem('selfSystemAssetOverrides');
+            const parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch {
+            return {};
+        }
+    }
+
+    saveAssetOverrides(next) {
+        try {
+            localStorage.setItem('selfSystemAssetOverrides', JSON.stringify(next && typeof next === 'object' ? next : {}));
+        } catch {
+        }
+    }
+
+    async verifyUrlAvailable(url) {
+        const raw = String(url || '').trim();
+        if (!raw) return false;
+        const noHash = raw.split('#')[0];
+        try {
+            const res = await fetch(noHash, { method: 'HEAD', cache: 'no-store' });
+            return !!res.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    getDefaultPdfFileName() {
+        return '中国古代名句辞典(修订本).1_副本.pdf';
+    }
+
+    getPdfBaseUrl() {
+        if (this.pdfFileBaseUrl) return String(this.pdfFileBaseUrl);
+        const overrides = this.loadAssetOverrides();
+        const override = typeof overrides.pdfUrl === 'string' ? overrides.pdfUrl.trim() : '';
+        if (override) return override;
+        return encodeURIComponent(this.getDefaultPdfFileName());
+    }
+
+    syncPdfAssetLinks() {
+        const base = this.getPdfBaseUrl();
+        const openBtn = document.getElementById('pdfOpenRawBtn');
+        const dl = document.getElementById('pdfFallbackDownload');
+        const unsupported = document.getElementById('pdfUnsupportedLink');
+        const importOpen = document.querySelector('#gkImportModal a[href*="打开当前PDF"]');
+        const href = base || '#';
+        if (openBtn) openBtn.setAttribute('href', href);
+        if (dl) dl.setAttribute('href', href);
+        if (unsupported) unsupported.setAttribute('href', href);
+        if (importOpen) importOpen.setAttribute('href', href);
+    }
+
+    async ensurePdfAvailable() {
+        if (this.pdfFileBaseUrl) return true;
+        if (this.pdfAvailabilityChecked) return !!this.pdfAvailabilityOk;
+        this.pdfAvailabilityChecked = true;
+        const base = this.getPdfBaseUrl();
+        if (!base) {
+            this.pdfAvailabilityOk = false;
+            return false;
+        }
+        const ok = await this.verifyUrlAvailable(base);
+        this.pdfAvailabilityOk = ok;
+        if (!ok) {
+            this.showAppStatus('PDF 原书未部署：请点击链条按钮设置直链，或选择本地 PDF', 'warning', { sticky: true });
+        }
+        return ok;
+    }
+
+    async promptSetPdfUrl() {
+        const overrides = this.loadAssetOverrides();
+        const current = typeof overrides.pdfUrl === 'string' ? overrides.pdfUrl : '';
+        const next = window.prompt('请输入 PDF 直链（https://.../file.pdf），留空则清除：', current || '');
+        if (next == null) return;
+        const trimmed = String(next).trim();
+        const updated = { ...overrides };
+        if (!trimmed) delete updated.pdfUrl;
+        else updated.pdfUrl = trimmed;
+        this.saveAssetOverrides(updated);
+        this.pdfAvailabilityChecked = false;
+        this.pdfAvailabilityOk = false;
+        this.pdfFileBaseUrl = '';
+        this.syncPdfAssetLinks();
+        this.goToPage(1);
+    }
+
+    getDefaultOxfordFileName() {
+        return '牛津通识读本百本纪念套装（共100册）.epub';
+    }
+
+    getOxfordSourceUrl() {
+        const overrides = this.loadAssetOverrides();
+        const override = typeof overrides.oxfordEpubUrl === 'string' ? overrides.oxfordEpubUrl.trim() : '';
+        if (override) return override;
+        return encodeURIComponent(this.oxfordState?.file || this.getDefaultOxfordFileName());
+    }
+
+    syncOxfordAssetLinks() {
+        const src = this.getOxfordSourceUrl();
+        const downloadBtn = document.getElementById('oxfordDownloadBtn');
+        const openRawBtn = document.getElementById('oxfordOpenRawBtn');
+        const href = src || '#';
+        if (downloadBtn) downloadBtn.setAttribute('href', href);
+        if (openRawBtn) openRawBtn.setAttribute('href', href);
+    }
+
+    async promptSetOxfordUrl() {
+        const overrides = this.loadAssetOverrides();
+        const current = typeof overrides.oxfordEpubUrl === 'string' ? overrides.oxfordEpubUrl : '';
+        const next = window.prompt('请输入 EPUB 直链（https://.../file.epub），留空则清除：', current || '');
+        if (next == null) return;
+        const trimmed = String(next).trim();
+        const updated = { ...overrides };
+        if (!trimmed) delete updated.oxfordEpubUrl;
+        else updated.oxfordEpubUrl = trimmed;
+        this.saveAssetOverrides(updated);
+        this.syncOxfordAssetLinks();
+        this.openOxfordDefaultEpub();
+    }
+
     async loadReadingPlansFromApi() {
         const hostname = String(window.location.hostname || '').toLowerCase();
         const isLocalHost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '';
@@ -9043,6 +9170,7 @@ class SelfSystem {
         const openBtn = document.getElementById('oxfordOpenDefaultBtn');
         const pickBtn = document.getElementById('oxfordPickFileBtn');
         const fileInput = document.getElementById('oxfordFileInput');
+        const setUrlBtn = document.getElementById('oxfordSetUrlBtn');
         const prevBtn = document.getElementById('oxfordPrevBtn');
         const nextBtn = document.getElementById('oxfordNextBtn');
         const fontDownBtn = document.getElementById('oxfordFontDownBtn');
@@ -9056,8 +9184,10 @@ class SelfSystem {
         const navEl = document.getElementById('oxfordNav');
         const bookmarksEl = document.getElementById('oxfordBookmarks');
 
+        this.syncOxfordAssetLinks();
         openBtn?.addEventListener('click', () => this.openOxfordDefaultEpub());
         pickBtn?.addEventListener('click', () => fileInput?.click());
+        setUrlBtn?.addEventListener('click', () => this.promptSetOxfordUrl());
         fileInput?.addEventListener('change', () => {
             const file = fileInput.files && fileInput.files[0];
             if (!file) return;
@@ -9465,11 +9595,14 @@ class SelfSystem {
     }
 
     async openOxfordDefaultEpub() {
-        const fileName = this.oxfordState?.file || '牛津通识读本百本纪念套装（共100册）.epub';
-        const url = encodeURIComponent(fileName);
-        const ok = await this.openOxfordEpub(url);
+        const source = this.getOxfordSourceUrl();
+        const ok = await this.openOxfordEpub(source);
         if (!ok) {
-            this.setOxfordStatus('未找到 EPUB 原书文件，可点击「选择EPUB」导入本地文件');
+            this.setOxfordStatus('EPUB 原书未部署：可点击「设置链接」填入直链，或点击「选择EPUB」导入本地文件');
+            const navEl = document.getElementById('oxfordNav');
+            if (navEl) navEl.innerHTML = `<div class="oxford-empty">未加载：请先设置 EPUB 直链或导入本地文件</div>`;
+            const metaEl = document.getElementById('oxfordBookMeta');
+            if (metaEl) metaEl.textContent = '未加载';
         }
         return ok;
     }
@@ -10148,6 +10281,13 @@ class SelfSystem {
         this.renderGeneralKnowledgeQuotes();
     }
 
+    supportsEmbeddedPdf() {
+        const ua = String(navigator.userAgent || '');
+        const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        if (isIOS) return false;
+        return true;
+    }
+
     // PDF查看器功能
     initPDFViewer() {
         this.currentPDFPage = Number.isFinite(this.currentPDFPage) ? this.currentPDFPage : 1;
@@ -10159,7 +10299,24 @@ class SelfSystem {
             this.pdfEventsBound = true;
         }
         this.generatePDFToc();
-        this.goToPage(this.currentPDFPage);
+        const hint = document.getElementById('pdfUnsupportedHint');
+        const pdfObject = document.getElementById('pdfObject');
+        if (!this.supportsEmbeddedPdf()) {
+            if (hint) hint.style.display = 'block';
+            if (pdfObject) pdfObject.style.display = 'none';
+            Promise.resolve(this.ensurePdfAvailable()).catch(() => {});
+            return;
+        }
+        if (hint) hint.style.display = 'none';
+        if (pdfObject) pdfObject.style.display = '';
+        Promise.resolve(this.ensurePdfAvailable())
+            .then((ok) => {
+                if (ok) this.goToPage(this.currentPDFPage);
+                else this.goToPage(1);
+            })
+            .catch(() => {
+                this.goToPage(1);
+            });
     }
 
     bindPDFEvents() {
@@ -10195,8 +10352,12 @@ class SelfSystem {
         });
 
         const pdfPickBtn = document.getElementById('pdfPickFileBtn');
+        const pdfSetUrlBtn = document.getElementById('pdfSetUrlBtn');
+        const pdfOpenRawBtn = document.getElementById('pdfOpenRawBtn');
         const pdfFileInput = document.getElementById('pdfFileInput');
+        this.syncPdfAssetLinks();
         pdfPickBtn?.addEventListener('click', () => pdfFileInput?.click());
+        pdfSetUrlBtn?.addEventListener('click', () => this.promptSetPdfUrl());
         pdfFileInput?.addEventListener('change', () => {
             const file = pdfFileInput.files && pdfFileInput.files[0];
             if (!file) return;
@@ -10208,9 +10369,22 @@ class SelfSystem {
             try {
                 this.pdfFileObjectUrl = URL.createObjectURL(file);
                 this.pdfFileBaseUrl = this.pdfFileObjectUrl;
+                this.syncPdfAssetLinks();
                 this.currentPDFPage = 1;
                 this.goToPage(1);
             } catch {
+            }
+        });
+        pdfOpenRawBtn?.addEventListener('click', async (e) => {
+            const base = this.getPdfBaseUrl();
+            if (base && (base.startsWith('http://') || base.startsWith('https://') || base.startsWith('blob:'))) {
+                pdfOpenRawBtn.setAttribute('href', base);
+                return;
+            }
+            const ok = await this.verifyUrlAvailable(base);
+            if (!ok) {
+                e.preventDefault();
+                this.promptSetPdfUrl();
             }
         });
 
@@ -10276,8 +10450,12 @@ class SelfSystem {
         const pageInput = document.getElementById('pdfPageInput');
         
         if (pdfObject) {
-            const file = '中国古代名句辞典(修订本).1_副本.pdf';
-            const base = this.pdfFileBaseUrl ? String(this.pdfFileBaseUrl) : encodeURIComponent(file);
+            const base = this.getPdfBaseUrl();
+            if (!base) {
+                pdfObject.setAttribute('data', 'about:blank');
+                pdfObject.data = 'about:blank';
+                return;
+            }
             const url = `${base}#page=${page}`;
             const parent = pdfObject.parentNode;
             if (parent) {

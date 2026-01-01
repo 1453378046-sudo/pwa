@@ -1,4 +1,4 @@
-const SW_VERSION = '5.0.5';
+const SW_VERSION = '5.0.6';
 const CACHE_NAME = `self-system-${SW_VERSION}`;
 const CORE_URLS = [
     './',
@@ -17,7 +17,7 @@ const OPTIONAL_URLS = [
     'styles/main.css?v=4.8',
     'styles/gk.css?v=1.3',
     'styles/pdf-viewer.css?v=1.1',
-    'scripts/app.js?v=5.1',
+    'scripts/app.js?v=5.2',
     'scripts/todo-calendar.js?v=1.3',
     'scripts/pdf-viewer.js'
 ];
