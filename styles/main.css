@@ -2236,6 +2236,7 @@ a {
 }
 
 .reading-form input[type="number"] {
+    appearance: textfield;
     -moz-appearance: textfield;
 }
 
@@ -2714,6 +2715,7 @@ select.form-control {
 }
 
 .new-concept-nav input[type="number"].form-control {
+    appearance: textfield;
     -moz-appearance: textfield;
 }
 
