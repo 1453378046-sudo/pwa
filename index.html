@@ -777,6 +777,10 @@
                             <div class="pdf-fallback" id="pdfUnsupportedHint" style="display: none;">
                                 <p>当前设备不支持内嵌 PDF 预览，请 <a href="#" id="pdfUnsupportedLink" target="_blank" rel="noopener noreferrer">点击这里打开/下载</a></p>
                             </div>
+                            <div class="pdfjs-viewer" id="pdfJsViewer" style="display: none;">
+                                <div class="pdf-fallback" id="pdfJsLoading" style="display: none;">PDF 渲染中…</div>
+                                <canvas id="pdfJsCanvas"></canvas>
+                            </div>
                             <object 
                                 id="pdfObject" 
                                 data="about:blank" 

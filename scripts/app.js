@@ -2904,10 +2904,23 @@ class SelfSystem {
         if (!raw) return false;
         const noHash = raw.split('#')[0];
         try {
-            const res = await fetch(noHash, { method: 'HEAD', cache: 'no-store' });
-            return !!res.ok;
+            const res = await fetch(noHash, {
+                method: 'GET',
+                cache: 'no-store',
+                headers: { Range: 'bytes=0-0' }
+            });
+            try {
+                res.body?.cancel?.();
+            } catch {
+            }
+            return res.status === 200 || res.status === 206;
         } catch {
-            return false;
+            try {
+                const res = await fetch(noHash, { method: 'HEAD', cache: 'no-store' });
+                return !!res.ok;
+            } catch {
+                return false;
+            }
         }
     }
 
@@ -2941,14 +2954,10 @@ class SelfSystem {
         if (this.pdfAvailabilityChecked) return !!this.pdfAvailabilityOk;
         this.pdfAvailabilityChecked = true;
         const base = this.getPdfBaseUrl();
-        if (!base) {
-            this.pdfAvailabilityOk = false;
-            return false;
-        }
         const ok = await this.verifyUrlAvailable(base);
         this.pdfAvailabilityOk = ok;
         if (!ok) {
-            this.showAppStatus('PDF 原书未部署：请点击链条按钮设置直链，或选择本地 PDF', 'warning', { sticky: true });
+            this.showAppStatus('PDF 原书未部署：文件未随站点发布（或链接不可用）。请点链条按钮设置直链，或选择本地 PDF', 'warning', { sticky: true });
         }
         return ok;
     }
@@ -9596,9 +9605,20 @@ class SelfSystem {
 
     async openOxfordDefaultEpub() {
         const source = this.getOxfordSourceUrl();
+        if (typeof source === 'string' && source && !source.startsWith('blob:')) {
+            const ok = await this.verifyUrlAvailable(source);
+            if (!ok) {
+                this.setOxfordStatus('EPUB 原书未部署：Cloudflare Pages 单文件限制 25MiB，建议上传到 Cloudflare R2 后使用「设置链接」');
+                const navEl = document.getElementById('oxfordNav');
+                if (navEl) navEl.innerHTML = `<div class="oxford-empty">未加载：请先设置 EPUB 直链或导入本地文件</div>`;
+                const metaEl = document.getElementById('oxfordBookMeta');
+                if (metaEl) metaEl.textContent = '未加载';
+                return false;
+            }
+        }
         const ok = await this.openOxfordEpub(source);
         if (!ok) {
-            this.setOxfordStatus('EPUB 原书未部署：可点击「设置链接」填入直链，或点击「选择EPUB」导入本地文件');
+            this.setOxfordStatus('EPUB 原书未部署：Cloudflare Pages 单文件限制 25MiB，建议上传到 Cloudflare R2 后使用「设置链接」');
             const navEl = document.getElementById('oxfordNav');
             if (navEl) navEl.innerHTML = `<div class="oxford-empty">未加载：请先设置 EPUB 直链或导入本地文件</div>`;
             const metaEl = document.getElementById('oxfordBookMeta');
@@ -10288,6 +10308,92 @@ class SelfSystem {
         return true;
     }
 
+    shouldUsePdfJsViewer() {
+        const ready = !!window.pdfjsLib?.getDocument;
+        if (!ready) return false;
+        if (!this.supportsEmbeddedPdf()) return true;
+        return false;
+    }
+
+    async loadPdfJsDocument(url) {
+        const pdfjsLib = window.pdfjsLib;
+        if (!pdfjsLib?.getDocument) return null;
+        const raw = String(url || '').trim();
+        if (!raw) return null;
+        const noHash = raw.split('#')[0];
+        try {
+            if (this.pdfJsLoadingTask?.destroy) {
+                try {
+                    await this.pdfJsLoadingTask.destroy();
+                } catch {
+                }
+            }
+        } catch {
+        }
+
+        try {
+            const task = pdfjsLib.getDocument({ url: noHash });
+            this.pdfJsLoadingTask = task;
+            const doc = await task.promise;
+            this.pdfJsDoc = doc;
+            return doc;
+        } catch {
+            this.pdfJsDoc = null;
+            return null;
+        }
+    }
+
+    async renderPdfJsPage(page) {
+        const viewer = document.getElementById('pdfJsViewer');
+        const canvas = document.getElementById('pdfJsCanvas');
+        const loading = document.getElementById('pdfJsLoading');
+        if (!viewer || !canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        if (!this.pdfJsDoc) {
+            if (loading) loading.style.display = 'block';
+            const base = this.getPdfBaseUrl();
+            const doc = await this.loadPdfJsDocument(base);
+            if (loading) loading.style.display = 'none';
+            if (!doc) {
+                this.showAppStatus('PDF 原书未部署或无法读取：Cloudflare Pages 单文件限制 25MiB，建议将 PDF 上传到 Cloudflare R2 后使用「设置 PDF 直链」', 'warning', { sticky: true });
+                return;
+            }
+        }
+
+        const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+        this.pdfJsRenderToken = token;
+
+        try {
+            if (loading) loading.style.display = 'block';
+            const doc = this.pdfJsDoc;
+            const total = Number(doc?.numPages) || 1123;
+            const safePage = Math.max(1, Math.min(Number(page) || 1, total));
+            const pageObj = await doc.getPage(safePage);
+            if (this.pdfJsRenderToken !== token) return;
+
+            const baseViewport = pageObj.getViewport({ scale: 1 });
+            const padding = 32;
+            const width = Math.max(320, viewer.clientWidth - padding);
+            const scale = Math.min(2.2, Math.max(0.8, width / baseViewport.width));
+            const viewport = pageObj.getViewport({ scale });
+
+            canvas.width = Math.floor(viewport.width);
+            canvas.height = Math.floor(viewport.height);
+            canvas.style.width = `${Math.floor(viewport.width)}px`;
+            canvas.style.height = `${Math.floor(viewport.height)}px`;
+
+            const renderTask = pageObj.render({ canvasContext: ctx, viewport });
+            this.pdfJsActiveRenderTask = renderTask;
+            await renderTask.promise;
+        } catch {
+            this.showAppStatus('PDF 渲染失败：请尝试点击「设置 PDF 直链」或下载后本地打开', 'warning', { sticky: true });
+        } finally {
+            if (loading) loading.style.display = 'none';
+        }
+    }
+
     // PDF查看器功能
     initPDFViewer() {
         this.currentPDFPage = Number.isFinite(this.currentPDFPage) ? this.currentPDFPage : 1;
@@ -10299,24 +10405,41 @@ class SelfSystem {
             this.pdfEventsBound = true;
         }
         this.generatePDFToc();
+        this.syncPdfAssetLinks();
+
         const hint = document.getElementById('pdfUnsupportedHint');
         const pdfObject = document.getElementById('pdfObject');
+        const pdfJsViewer = document.getElementById('pdfJsViewer');
+
+        const usePdfJs = this.shouldUsePdfJsViewer();
+        this.pdfUseJsViewer = usePdfJs;
+
+        if (usePdfJs) {
+            if (hint) hint.style.display = 'none';
+            if (pdfObject) pdfObject.style.display = 'none';
+            if (pdfJsViewer) pdfJsViewer.style.display = 'flex';
+            this.renderPdfJsPage(this.currentPDFPage);
+            if (!this._pdfJsResizeBound) {
+                this._pdfJsResizeBound = () => {
+                    if (this.pdfUseJsViewer) this.renderPdfJsPage(this.currentPDFPage);
+                };
+                window.addEventListener('resize', this._pdfJsResizeBound);
+            }
+            return;
+        }
+
         if (!this.supportsEmbeddedPdf()) {
             if (hint) hint.style.display = 'block';
             if (pdfObject) pdfObject.style.display = 'none';
-            Promise.resolve(this.ensurePdfAvailable()).catch(() => {});
+            if (pdfJsViewer) pdfJsViewer.style.display = 'none';
+            this.showAppStatus('当前设备不支持内嵌 PDF：请点击右上角打开/下载，或使用「设置 PDF 直链」', 'warning', { sticky: true });
             return;
         }
+
         if (hint) hint.style.display = 'none';
         if (pdfObject) pdfObject.style.display = '';
-        Promise.resolve(this.ensurePdfAvailable())
-            .then((ok) => {
-                if (ok) this.goToPage(this.currentPDFPage);
-                else this.goToPage(1);
-            })
-            .catch(() => {
-                this.goToPage(1);
-            });
+        if (pdfJsViewer) pdfJsViewer.style.display = 'none';
+        this.goToPage(this.currentPDFPage);
     }
 
     bindPDFEvents() {
@@ -10449,7 +10572,9 @@ class SelfSystem {
         const pdfObject = document.getElementById('pdfObject');
         const pageInput = document.getElementById('pdfPageInput');
         
-        if (pdfObject) {
+        if (this.pdfUseJsViewer) {
+            this.renderPdfJsPage(page);
+        } else if (pdfObject) {
             const base = this.getPdfBaseUrl();
             if (!base) {
                 pdfObject.setAttribute('data', 'about:blank');
