@@ -10652,7 +10652,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('offline', handleConnectivity);
     if (!navigator.onLine) handleConnectivity();
 
-    const swVersion = '5.0.4';
+    const swVersion = '5.0.5';
     const registerServiceWorker = async () => {
         if (!('serviceWorker' in navigator)) return;
         const swUrl = new URL('sw.js', window.location.href);

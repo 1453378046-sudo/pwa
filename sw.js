@@ -1,4 +1,4 @@
-const SW_VERSION = '5.0.4';
+const SW_VERSION = '5.0.5';
 const CACHE_NAME = `self-system-${SW_VERSION}`;
 const CORE_URLS = [
     './',
@@ -17,7 +17,7 @@ const OPTIONAL_URLS = [
     'styles/main.css?v=4.8',
     'styles/gk.css?v=1.3',
     'styles/pdf-viewer.css?v=1.1',
-    'scripts/app.js?v=5.0',
+    'scripts/app.js?v=5.1',
     'scripts/todo-calendar.js?v=1.3',
     'scripts/pdf-viewer.js'
 ];
@@ -92,7 +92,7 @@ function isStaticAsset(url) {
 }
 
 async function cacheFirst(request) {
-    const cached = await caches.match(request, { ignoreSearch: true });
+    const cached = await caches.match(request);
     if (cached) return cached;
     const response = await fetch(request);
     if (shouldCacheResponse(request, response)) {
@@ -111,7 +111,7 @@ async function networkFirst(request) {
         }
         return response;
     } catch {
-        const cached = await caches.match(request, { ignoreSearch: true });
+        const cached = await caches.match(request, { ignoreSearch: isHtmlRequest(request) });
         if (cached) return cached;
         if (isHtmlRequest(request)) {
             const fallback = await caches.match('index.html', { ignoreSearch: true });
