@@ -10,6 +10,8 @@ ocr-output/
 *.xlsx
 *.png
 
+!.gitattributes
+
 reading_plans.json
 gk_quotes.json
 repayment_data.json
