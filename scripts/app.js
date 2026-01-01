@@ -2933,6 +2933,9 @@ class SelfSystem {
         const overrides = this.loadAssetOverrides();
         const override = typeof overrides.pdfUrl === 'string' ? overrides.pdfUrl.trim() : '';
         if (override) return override;
+        if (this.isHostedEnvironment()) {
+            return `https://github.com/1453378046-sudo/pwa/raw/main/${encodeURIComponent(this.getDefaultPdfFileName())}`;
+        }
         return encodeURIComponent(this.getDefaultPdfFileName());
     }
 
@@ -2987,7 +2990,11 @@ class SelfSystem {
         const overrides = this.loadAssetOverrides();
         const override = typeof overrides.oxfordEpubUrl === 'string' ? overrides.oxfordEpubUrl.trim() : '';
         if (override) return override;
-        return encodeURIComponent(this.oxfordState?.file || this.getDefaultOxfordFileName());
+        const fileName = this.oxfordState?.file || this.getDefaultOxfordFileName();
+        if (this.isHostedEnvironment()) {
+            return `https://github.com/1453378046-sudo/pwa/raw/main/${encodeURIComponent(fileName)}`;
+        }
+        return encodeURIComponent(fileName);
     }
 
     syncOxfordAssetLinks() {
