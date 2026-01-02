@@ -1,4 +1,4 @@
-const SW_VERSION = '5.0.8';
+const SW_VERSION = '5.0.9';
 const CACHE_NAME = `self-system-${SW_VERSION}`;
 const CORE_URLS = [
     './',
@@ -91,6 +91,17 @@ function isStaticAsset(url) {
     );
 }
 
+function isAppShellAsset(url) {
+    const pathname = url.pathname || '';
+    return (
+        pathname === '/' ||
+        pathname.endsWith('/index.html') ||
+        pathname.endsWith('/sw.js') ||
+        pathname.endsWith('/scripts/app.js') ||
+        pathname.endsWith('/styles.css')
+    );
+}
+
 async function cacheFirst(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
@@ -147,6 +158,11 @@ self.addEventListener('fetch', event => {
     }
 
     if (isHtmlRequest(request)) {
+        event.respondWith(networkFirst(request));
+        return;
+    }
+
+    if (url.origin === self.location.origin && isAppShellAsset(url)) {
         event.respondWith(networkFirst(request));
         return;
     }
