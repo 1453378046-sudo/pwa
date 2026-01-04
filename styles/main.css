@@ -1939,12 +1939,31 @@ a {
     /* 应用容器布局调整 */
     .app-container {
         flex-direction: column;
+        padding: 0;
+        gap: 0;
+    }
+
+    .main-content-wrapper {
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        min-height: 100vh;
     }
     
     /* 顶部导航栏移动端适配 */
     .app-header {
-        padding: 0 1rem;
-        height: 60px;
+        padding-left: calc(1rem + env(safe-area-inset-left));
+        padding-right: calc(1rem + env(safe-area-inset-right));
+        height: 56px;
+    }
+
+    .header-content {
+        max-width: none;
+    }
+
+    .header-left {
+        gap: 0.75rem;
+        min-width: 0;
     }
     
     .mobile-toggle {
@@ -1953,6 +1972,10 @@ a {
     
     .date-display {
         font-size: 1rem;
+        max-width: 58vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     .user-info {
@@ -1966,16 +1989,19 @@ a {
     /* 侧边栏移动端适配 */
     .sidebar {
         position: fixed;
-        left: -280px;
+        left: 0;
         top: 0;
         height: 100vh;
         z-index: 1000;
-        transition: left 0.3s ease;
+        width: min(320px, 86vw);
+        border-radius: 0 24px 24px 0;
+        transition: transform 0.3s ease;
         box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+        transform: translateX(-110%);
     }
     
     .sidebar.active {
-        left: 0;
+        transform: translateX(0);
     }
     
     .main-content-wrapper {
@@ -1995,12 +2021,65 @@ a {
     /* 内容区域移动端适配 */
     .pwa-metrics-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .pwa-header {
+        padding: 1.25rem 1rem;
+    }
+
+    .pwa-header-title h1 {
+        font-size: 1.35rem;
+    }
+
+    .pwa-subtitle {
+        font-size: 0.95rem;
+    }
+
+    .pwa-container {
+        padding: 1rem;
+        min-height: auto;
+    }
+
+    .pwa-metric-card {
+        padding: 1.25rem;
+        gap: 1rem;
+        border-radius: 18px;
+    }
+
+    .pwa-metric-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        font-size: 1.35rem;
+    }
+
+    .pwa-metric-value {
+        font-size: 1.7rem;
     }
     
     .pwa-section-header {
         flex-direction: column;
         gap: 1rem;
         align-items: flex-start;
+        padding: 1.25rem;
+    }
+
+    .pwa-section-body {
+        padding: 1rem 1.25rem 1.25rem;
+    }
+
+    .pwa-section-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .pwa-section-actions .pwa-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+        padding: 0.85rem 1rem;
+        font-size: 0.92rem;
     }
     
     .pwa-table-controls {
@@ -2024,6 +2103,32 @@ a {
     
     .pwa-payment-actions {
         width: 100%;
+    }
+
+    .app-status {
+        margin: 10px 12px 0 12px;
+    }
+}
+
+@media (max-width: 420px) {
+    .pwa-header-title h1 {
+        font-size: 1.2rem;
+    }
+
+    .pwa-subtitle {
+        display: none;
+    }
+
+    .pwa-metric-card {
+        padding: 1.1rem;
+    }
+
+    .pwa-section-header {
+        padding: 1.1rem;
+    }
+
+    .pwa-section-body {
+        padding: 0.9rem 1.1rem 1.1rem;
     }
 }
 

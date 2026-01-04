@@ -2934,7 +2934,7 @@ class SelfSystem {
         const override = typeof overrides.pdfUrl === 'string' ? overrides.pdfUrl.trim() : '';
         if (override) return override;
         if (this.isHostedEnvironment()) {
-            return `https://github.com/1453378046-sudo/pwa/raw/main/${encodeURIComponent(this.getDefaultPdfFileName())}`;
+            return `https://media.githubusercontent.com/media/1453378046-sudo/pwa/main/${encodeURIComponent(this.getDefaultPdfFileName())}`;
         }
         return encodeURIComponent(this.getDefaultPdfFileName());
     }
@@ -9256,8 +9256,7 @@ class SelfSystem {
         }
         if (this.oxfordAutoloading) return;
         this.oxfordAutoloading = true;
-        const navEl = document.getElementById('oxfordNav');
-        if (navEl) navEl.innerHTML = `<div class="oxford-empty">目录加载中…</div>`;
+        this.setOxfordNavPlaceholder('正在下载/解析 EPUB…');
         Promise.resolve(this.openOxfordDefaultEpub())
             .catch(() => {
             })
@@ -9269,6 +9268,13 @@ class SelfSystem {
     setOxfordStatus(text) {
         const hint = document.getElementById('oxfordStatusHint');
         if (hint) hint.textContent = String(text || '');
+    }
+
+    setOxfordNavPlaceholder(text) {
+        const navEl = document.getElementById('oxfordNav');
+        if (!navEl) return;
+        const safe = String(text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        navEl.innerHTML = `<div class="oxford-empty">${safe}</div>`;
     }
 
     normalizeOxfordHref(href) {
@@ -9329,7 +9335,7 @@ class SelfSystem {
         const active = this.normalizeOxfordHref(this.oxfordActiveHref || this.oxfordState?.lastHref || '');
         const groups = Array.isArray(this.oxfordNavGroups) ? this.oxfordNavGroups : [];
         if (!groups.length) {
-            navEl.innerHTML = `<div class="oxford-empty">目录加载中…</div>`;
+            navEl.innerHTML = `<div class="oxford-empty">正在下载/解析 EPUB…</div>`;
             return;
         }
 
@@ -9640,8 +9646,40 @@ class SelfSystem {
         }
         if (!file) return false;
         this.setOxfordStatus('正在读取本地 EPUB…');
+        this.setOxfordNavPlaceholder('正在读取本地 EPUB…');
         try {
-            const buf = await file.arrayBuffer();
+            const buf = await new Promise((resolve, reject) => {
+                try {
+                    const reader = new FileReader();
+                    let lastUi = 0;
+                    reader.onerror = () => reject(reader.error || new Error('read error'));
+                    reader.onabort = () => reject(new Error('read aborted'));
+                    reader.onprogress = (evt) => {
+                        const now = Date.now();
+                        if (now - lastUi < 120) return;
+                        lastUi = now;
+                        if (evt && evt.lengthComputable && Number.isFinite(evt.loaded) && Number.isFinite(evt.total) && evt.total > 0) {
+                            const pct = Math.max(0, Math.min(100, Math.round((evt.loaded / evt.total) * 100)));
+                            const loadedMb = (evt.loaded / 1024 / 1024).toFixed(1);
+                            const totalMb = (evt.total / 1024 / 1024).toFixed(1);
+                            const msg = `正在读取本地 EPUB：${pct}%（${loadedMb}/${totalMb}MB）`;
+                            this.setOxfordStatus(msg);
+                            this.setOxfordNavPlaceholder(msg);
+                            return;
+                        }
+                        if (evt && Number.isFinite(evt.loaded)) {
+                            const loadedMb = (evt.loaded / 1024 / 1024).toFixed(1);
+                            const msg = `正在读取本地 EPUB：已读取 ${loadedMb}MB`;
+                            this.setOxfordStatus(msg);
+                            this.setOxfordNavPlaceholder(msg);
+                        }
+                    };
+                    reader.onload = () => resolve(reader.result);
+                    reader.readAsArrayBuffer(file);
+                } catch (e) {
+                    reject(e);
+                }
+            });
             const ok = await this.openOxfordEpub(buf, { fileName: file.name });
             if (!ok) this.setOxfordStatus('加载失败：无法打开 EPUB');
             return ok;
@@ -9710,7 +9748,61 @@ class SelfSystem {
         container.innerHTML = '';
 
         try {
-            const book = window.ePub(source);
+            let openSource = source;
+            const rawSourceStr = typeof source === 'string' ? String(source).trim() : '';
+            const isRemote = rawSourceStr && (/^https?:\/\//i.test(rawSourceStr) || rawSourceStr.startsWith('/'));
+            if (isRemote) {
+                let lastUi = 0;
+                const update = (text) => {
+                    const now = Date.now();
+                    if (now - lastUi < 120 && !/100%/.test(String(text))) return;
+                    lastUi = now;
+                    this.setOxfordStatus(text);
+                    this.setOxfordNavPlaceholder(text);
+                };
+                update('正在下载 EPUB…');
+                const res = await fetch(rawSourceStr, { cache: 'no-store' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const total = Number(res.headers.get('content-length')) || 0;
+                if (!res.body || typeof res.body.getReader !== 'function') {
+                    update('正在下载 EPUB…');
+                    openSource = await res.arrayBuffer();
+                } else {
+                    const reader = res.body.getReader();
+                    const chunks = [];
+                    let received = 0;
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        if (value) {
+                            chunks.push(value);
+                            received += value.byteLength || value.length || 0;
+                        }
+                        if (total > 0) {
+                            const pct = Math.max(0, Math.min(100, Math.round((received / total) * 100)));
+                            const loadedMb = (received / 1024 / 1024).toFixed(1);
+                            const totalMb = (total / 1024 / 1024).toFixed(1);
+                            update(`正在下载 EPUB：${pct}%（${loadedMb}/${totalMb}MB）`);
+                        } else {
+                            const loadedMb = (received / 1024 / 1024).toFixed(1);
+                            update(`正在下载 EPUB：已下载 ${loadedMb}MB`);
+                        }
+                    }
+                    const buf = new Uint8Array(received);
+                    let offset = 0;
+                    for (const c of chunks) {
+                        buf.set(c, offset);
+                        offset += c.byteLength || c.length || 0;
+                    }
+                    update('正在解析 EPUB…');
+                    openSource = buf.buffer;
+                }
+            } else {
+                this.setOxfordStatus('正在解析 EPUB…');
+                this.setOxfordNavPlaceholder('正在解析 EPUB…');
+            }
+
+            const book = window.ePub(openSource);
             this.oxfordBook = book;
             const rendition = book.renderTo('oxfordRendition', {
                 width: '100%',
@@ -9745,6 +9837,8 @@ class SelfSystem {
             const metaEl = document.getElementById('oxfordBookMeta');
             if (metaEl) metaEl.textContent = title;
 
+            this.setOxfordStatus('正在生成目录…');
+            this.setOxfordNavPlaceholder('正在生成目录…');
             const navigation = await book.loaded?.navigation;
             const toc = navigation?.toc || [];
             this.oxfordNavGroups = this.buildOxfordNavGroups(toc);
@@ -10317,8 +10411,7 @@ class SelfSystem {
     shouldUsePdfJsViewer() {
         const ready = !!window.pdfjsLib?.getDocument;
         if (!ready) return false;
-        if (!this.supportsEmbeddedPdf()) return true;
-        return false;
+        return true;
     }
 
     async waitForPdfJsReady(maxMs = 5000) {
@@ -10375,6 +10468,9 @@ class SelfSystem {
                 this.showAppStatus('PDF 原书未部署或无法读取：Cloudflare Pages 单文件限制 25MiB，建议将 PDF 上传到 Cloudflare R2 后使用「设置 PDF 直链」', 'warning', { sticky: true });
                 return;
             }
+            this.pdfTotalPages = Number(doc?.numPages) || 1123;
+            const input = document.getElementById('pdfPageInput');
+            if (input) input.max = String(this.pdfTotalPages);
         }
 
         const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -10425,6 +10521,21 @@ class SelfSystem {
         const hint = document.getElementById('pdfUnsupportedHint');
         const pdfObject = document.getElementById('pdfObject');
         const pdfJsViewer = document.getElementById('pdfJsViewer');
+        const ensurePdfJsResizeBound = () => {
+            if (this._pdfJsResizeBound) return;
+            this._pdfJsResizeBound = () => {
+                if (this.pdfUseJsViewer) this.renderPdfJsPage(this.currentPDFPage);
+            };
+            window.addEventListener('resize', this._pdfJsResizeBound);
+        };
+        const switchToPdfJs = () => {
+            this.pdfUseJsViewer = true;
+            if (hint) hint.style.display = 'none';
+            if (pdfObject) pdfObject.style.display = 'none';
+            if (pdfJsViewer) pdfJsViewer.style.display = 'flex';
+            this.renderPdfJsPage(this.currentPDFPage);
+            ensurePdfJsResizeBound();
+        };
 
         if (!this.supportsEmbeddedPdf()) {
             Promise.resolve(this.waitForPdfJsReady(6000))
@@ -10432,16 +10543,7 @@ class SelfSystem {
                     const usePdfJs = ok && this.shouldUsePdfJsViewer();
                     this.pdfUseJsViewer = usePdfJs;
                     if (usePdfJs) {
-                        if (hint) hint.style.display = 'none';
-                        if (pdfObject) pdfObject.style.display = 'none';
-                        if (pdfJsViewer) pdfJsViewer.style.display = 'flex';
-                        this.renderPdfJsPage(this.currentPDFPage);
-                        if (!this._pdfJsResizeBound) {
-                            this._pdfJsResizeBound = () => {
-                                if (this.pdfUseJsViewer) this.renderPdfJsPage(this.currentPDFPage);
-                            };
-                            window.addEventListener('resize', this._pdfJsResizeBound);
-                        }
+                        switchToPdfJs();
                         return;
                     }
                     if (hint) hint.style.display = 'block';
@@ -10460,16 +10562,7 @@ class SelfSystem {
         const usePdfJs = this.shouldUsePdfJsViewer();
         this.pdfUseJsViewer = usePdfJs;
         if (usePdfJs) {
-            if (hint) hint.style.display = 'none';
-            if (pdfObject) pdfObject.style.display = 'none';
-            if (pdfJsViewer) pdfJsViewer.style.display = 'flex';
-            this.renderPdfJsPage(this.currentPDFPage);
-            if (!this._pdfJsResizeBound) {
-                this._pdfJsResizeBound = () => {
-                    if (this.pdfUseJsViewer) this.renderPdfJsPage(this.currentPDFPage);
-                };
-                window.addEventListener('resize', this._pdfJsResizeBound);
-            }
+            switchToPdfJs();
             return;
         }
 
@@ -10477,6 +10570,12 @@ class SelfSystem {
         if (pdfObject) pdfObject.style.display = '';
         if (pdfJsViewer) pdfJsViewer.style.display = 'none';
         this.goToPage(this.currentPDFPage);
+        Promise.resolve(this.waitForPdfJsReady(6000)).then((ok) => {
+            if (!ok) return;
+            if (this.pdfUseJsViewer) return;
+            switchToPdfJs();
+        }).catch(() => {
+        });
     }
 
     bindPDFEvents() {
@@ -10599,7 +10698,8 @@ class SelfSystem {
 
     goToPage(page) {
         const safePage = Number.isFinite(page) ? page : 1;
-        page = Math.max(1, Math.min(safePage, 1123));
+        const maxPage = Number.isFinite(this.pdfTotalPages) ? this.pdfTotalPages : 1123;
+        page = Math.max(1, Math.min(safePage, maxPage));
         this.currentPDFPage = page;
         
         // 更新页面显示
@@ -10989,7 +11089,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('offline', handleConnectivity);
     if (!navigator.onLine) handleConnectivity();
 
-    const swVersion = '5.0.5';
+    const swVersion = '5.1.0';
     const registerServiceWorker = async () => {
         if (!('serviceWorker' in navigator)) return;
         const swUrl = new URL('sw.js', window.location.href);
