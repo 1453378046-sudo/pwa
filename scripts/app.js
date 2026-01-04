@@ -4405,6 +4405,8 @@ class SelfSystem {
         const startDateObj = new Date(`${startDateValue}T00:00:00`);
         const startWeekday = startDateObj.getDay();
         const startDayOfMonth = startDateObj.getDate();
+        const effectiveRecurrenceType =
+            recurrenceType === 'once' && startDateValue !== endDateValue ? 'daily' : recurrenceType;
         
         // 构建时间设置
         let timeSettings = {};
@@ -4446,42 +4448,42 @@ class SelfSystem {
         }
         
         // 构建重复规则
-        let recurrenceRule = { type: recurrenceType };
+        let recurrenceRule = { type: effectiveRecurrenceType };
 
-        if (recurrenceType === 'once') {
+        if (effectiveRecurrenceType === 'once') {
             recurrenceRule = { type: 'once' };
-        } else if (recurrenceType === 'daily') {
+        } else if (effectiveRecurrenceType === 'daily') {
             recurrenceRule = {
                 type: 'daily',
                 interval: 1
             };
-        } else if (recurrenceType === 'weekly') {
+        } else if (effectiveRecurrenceType === 'weekly') {
             recurrenceRule = {
                 type: 'weekly',
                 interval: 1,
                 days: [startWeekday]
             };
-        } else if (recurrenceType === 'monthly') {
+        } else if (effectiveRecurrenceType === 'monthly') {
             recurrenceRule = {
                 type: 'monthly',
                 interval: 1,
                 dayOfMonth: startDayOfMonth
             };
-        } else if (recurrenceType === 'single_week') {
+        } else if (effectiveRecurrenceType === 'single_week') {
             recurrenceRule = {
                 type: 'single_week',
                 interval: 2,
                 parity: 0,
                 days: [startWeekday]
             };
-        } else if (recurrenceType === 'double_week') {
+        } else if (effectiveRecurrenceType === 'double_week') {
             recurrenceRule = {
                 type: 'double_week',
                 interval: 2,
                 parity: 1,
                 days: [startWeekday]
             };
-        } else if (recurrenceType === 'custom') {
+        } else if (effectiveRecurrenceType === 'custom') {
             const interval = parseInt(document.getElementById('recurrenceInterval').value);
             const unit = document.getElementById('recurrenceUnit').value;
             
@@ -5075,7 +5077,37 @@ class SelfSystem {
     loadLearningPlans() {
         try {
             const saved = localStorage.getItem('selfSystemLearningPlans');
-            return saved ? JSON.parse(saved) : [];
+            const plans = saved ? JSON.parse(saved) : [];
+            if (!Array.isArray(plans)) return [];
+
+            let changed = false;
+            const normalized = plans
+                .filter(Boolean)
+                .map(plan => {
+                    if (!plan || typeof plan !== 'object') return null;
+                    const startDate = typeof plan.startDate === 'string' ? plan.startDate : '';
+                    const endDate = typeof plan.endDate === 'string' ? plan.endDate : '';
+                    const rule = plan.recurrenceRule && typeof plan.recurrenceRule === 'object' ? plan.recurrenceRule : null;
+                    const ruleType = typeof rule?.type === 'string' ? rule.type : '';
+
+                    if (startDate && endDate && startDate !== endDate && (ruleType === 'once' || !ruleType)) {
+                        changed = true;
+                        return { ...plan, recurrenceRule: { type: 'daily', interval: 1 } };
+                    }
+
+                    return plan;
+                })
+                .filter(Boolean);
+
+            if (changed) {
+                try {
+                    localStorage.setItem('selfSystemLearningPlans', JSON.stringify(normalized));
+                } catch (error) {
+                    console.error('更新学习计划重复规则失败:', error);
+                }
+            }
+
+            return normalized;
         } catch (error) {
             console.error('加载学习计划数据失败:', error);
             return [];
